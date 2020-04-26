@@ -1,0 +1,46 @@
+{
+    "idCliente1": {
+        "idNegocio": "idNegocio",
+        "name": "nombre del negocio",
+        "ordenes": [
+            {
+                "name": "Amborguesa",
+                "cantidad": 1,
+                "costo": 45,
+                "desc": "descripcion del producto",
+                "img": "url de la imagen",
+                "fecha": "timestamp o fecha"
+            },
+            {
+                "name": "Amborguesa",
+                "cantidad": 1,
+                "costo": 45,
+                "desc": "descripcion del producto",
+                "img": "url de la imagen",
+                "fecha": "timestamp o fecha"
+            }
+        ]
+    },
+    "idCliente2": {
+        "idNegocio": "idNegocio",
+        "name": "nombre del negocio",
+        "orden": [
+            {
+                "name": "Amborguesa",
+                "cantidad": 1,
+                "costo": 45,
+                "desc": "descripcion del producto",
+                "img": "url de la imagen",
+                "fecha": "timestamp o fecha"
+            },
+            {
+                "name": "Amborguesa",
+                "cantidad": 1,
+                "costo": 45,
+                "desc": "descripcion del producto",
+                "img": "url de la imagen",
+                "fecha": "timestamp o fecha"
+            }
+        ]
+    }
+}

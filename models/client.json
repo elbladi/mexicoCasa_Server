@@ -1,0 +1,21 @@
+{
+    "id": "id",
+    "name": "Pancho",
+    "apellidos": "Gonzalez Salgado",
+    "email": "test@test.com",
+    "password": "laPassword",
+    "telefono": 8442736598,
+    "direccion": "calle valencia #345 col. Zaragoza",
+    "Referencia": "",
+    "fotoINE": "url de la foto",
+    "pedidoActual": [
+        {
+            "negocio": "nombre del negocio",
+            "name": "Amborguesa",
+            "amount": 1,
+            "costo": 43,
+            "fecha": "timestamp o fecha"
+        }
+    ],
+    "verificado": false
+}

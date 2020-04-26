@@ -1,0 +1,54 @@
+{
+    "id": "id del negocio",
+    "nameResponsable": "Don Antonio",
+    "apellidos": "Perez Guzman",
+    "email": "tonio@test.com",
+    "password": "contra123",
+    "telefono": 4358761,
+    "name": "Gorditas toño",
+    "direccion": "Blvd. Fundadores #348 col. Valle de las flores",
+    "desc": "Las gorditas de toño estan buenas y dos triquis bara",
+    "img": "https://c8.alamy.com/compes/t20754/la-ilustracion-muestra-una-casa-pequena-hecho-en-un-estilo-de-dibujos-animados-aislado-sobre-fondo-blanco-t20754.jpg",
+    "fotoMenu": "url a la foto del menu",
+    "fotoId": "url a la foto del menu",
+    "horarioTrabajo": {
+        "lunes": {
+            "from": "1PM",
+            "to": "10PM"
+        },
+        "martes": {
+            "from": "1PM",
+            "to": "10PM"
+        },
+        "miercoles": {
+            "from": "1PM",
+            "to": "10PM"
+        },
+        "jueves": {
+            "from": "1PM",
+            "to": "10PM"
+        },
+        "viernes": {
+            "from": "1PM",
+            "to": "10PM"
+        },
+        "sabado": {
+            "from": "1PM",
+            "to": "10PM"
+        },
+        "domingo": {
+            "from": "Cerrado",
+            "to": "Cerrado"
+        }
+    },
+    "metodoPago": {
+        "efectivo": false,
+        "tarjeta": false
+    },
+    "metodoEnvio": {
+        "domicilio": false,
+        "local": false
+    },
+    "calificacion": 3,
+    "verificado": false
+}

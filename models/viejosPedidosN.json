@@ -1,0 +1,46 @@
+{
+    "idNegocio1": {
+        "idCliente": "id del CLiente",
+        "cliente": "name del cliente",
+        "ordenes": [
+            {
+                "name": "Amborguesa",
+                "cantidad": 1,
+                "costo": 45,
+                "desc": "descripcion del producto",
+                "img": "url de la imagen",
+                "fecha": "timestamp o fecha"
+            },
+            {
+                "name": "Taquitos",
+                "cantidad": 2,
+                "costo": 30,
+                "desc": "descripcion del producto",
+                "img": "url de la imagen",
+                "fecha": "timestamp o fecha"
+            }
+        ]
+    },
+    "idNegocio2": {
+        "idCliente": "id del CLiente",
+        "cliente": "name del cliente",
+        "ordenes": [
+            {
+                "name": "Amborguesa",
+                "cantidad": 1,
+                "costo": 45,
+                "desc": "descripcion del producto",
+                "img": "url de la imagen",
+                "fecha": "timestamp o fecha"
+            },
+            {
+                "name": "Taquitos",
+                "cantidad": 2,
+                "costo": 30,
+                "desc": "descripcion del producto",
+                "img": "url de la imagen",
+                "fecha": "timestamp o fecha"
+            }
+        ]
+    }
+}

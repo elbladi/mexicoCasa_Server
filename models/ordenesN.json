@@ -1,0 +1,54 @@
+{
+    "idNegocio": {
+        "ordenes": [
+            {
+                "cliente": "idCliente",
+                "clienteName": "name del cliente",
+                "orden": [
+                    {
+                        "name": "Amborguesa",
+                        "amount": 1
+                    },
+                    {
+                        "name": "Taquitos",
+                        "amount": 2
+                    }
+                ]
+            },
+            {
+                "cliente": "idCliente",
+                "clienteName": "name del cliente",
+                "orden": [
+                    {
+                        "name": "Amborguesa",
+                        "amount": 1
+                    }
+                ]
+            }
+        ],
+        "preparando": [
+            {
+                "cliente": "idCliente",
+                "clienteName": "name del cliente",
+                "orden": [
+                    {
+                        "name": "Pizza",
+                        "amount": 1
+                    }
+                ]
+            }
+        ],
+        "ordenLista": [
+            {
+                "cliente": "idCliente",
+                "clienteName": "name del cliente",
+                "orden": [
+                    {
+                        "name": "Amborguesa",
+                        "amount": 1
+                    }
+                ]
+            }
+        ]
+    }
+}

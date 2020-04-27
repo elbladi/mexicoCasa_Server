@@ -5,29 +5,7 @@ const { validationResult } = require('express-validator');
 
 const instance = require('../firebase');
 require('firebase/firestore');
-require('firebase/storage');
-
-// const client = {
-//     id: 'id',
-//     name: 'Pancho',
-//     apellidos: 'Gonzalez Salgado',
-//     email: 'test@test.com',
-//     password: 'laPassword',
-//     telefono: 8442736598,
-//     direccion: 'calle valencia #345 col. Zaragoza',
-//     Referencia: '',
-//     fotoINE: 'url de la foto',
-//     pedidoActual: [
-//         {
-//             negocio: 'nombre del negocio',
-//             name: 'Amborguesa',
-//             amount: 1,
-//             costo: 43,
-//             fecha: 'timestamp o fecha'
-//         }
-//     ],
-//     verificado: false
-// }
+require('firebase/auth');
 
 const newClient = async (req, res, next) => {
     const error = validationResult(req);
@@ -36,27 +14,52 @@ const newClient = async (req, res, next) => {
             new HttpError('Error, Por favor revisa tus datos de entrada', 422)
         );
     }
+    let firebase = instance.getInstance();
 
-    console.log(req.body);
-
+    const newUser = {
+        ...req.body,
+        verificado: false
+    }
+    console.log('INICIANDO...')
+    let err = false
+    let existingUser;
     try {
-        let firebase = instance.getInstance();
-
-        const newUser = {
-            ...req.body,
-            verificado: false
-        }
-
-        await firebase.firestore().collection('clients').doc(newUser.id).set(newUser)
-            .then(_ => { })
-            .catch(error => next(new HttpError(error.message, 500)))
-
+        existingUser = await firebase.auth().createUserWithEmailAndPassword(req.body.email, req.body.password)
+            .then(succ => { })
+            .catch(error => {
+                existingUser.error = error
+                // return next(new HttpError(error.message, 500))
+            })
+        console.log(existingUser);
     } catch (error) {
+        existingUser = true;
+        // return next(new HttpError(error.message, 500));
+    }
+    if (existingUser) {
+        return next(new HttpError('User exist already. Please login', 422));
+    }
+
+    let createUset;
+    try {
+        createUset = await firebase.firestore().collection('clients').doc(newUser.id).set(newUser)
+            .then(_ => { })
+            .catch(error => createUset.error = error)
+        console.log(createUset);
+    } catch (error) {
+        createUset = true;
         return next(new HttpError(error.message, 500));
     }
 
+    if (createUset) {
+        return next(new HttpError('ALGO SALIO MAL', 500));
+    }
+
+    console.log('Usuario creado')
+
     res.json({ message: 'CREATION SUCCESS' });
 };
+
+
 const newBusiness = (req, res, next) => {
 
 };

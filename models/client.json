@@ -10,7 +10,14 @@
     "fotoINE": "url de la foto",
     "pedidoActual": [
         {
-            "negocio": "nombre del negocio",
+            "idnegocio": "id del negocio",
+            "name": "Amborguesa",
+            "amount": 1,
+            "costo": 43,
+            "fecha": "timestamp o fecha"
+        },
+        {
+            "idnegocio": "id del negocio",
             "name": "Amborguesa",
             "amount": 1,
             "costo": 43,

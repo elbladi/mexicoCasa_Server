@@ -22,7 +22,6 @@ const firebaseConfig = {
 
 require('./firebase').init(firebaseConfig);
 
-// app.use(express.static('images'));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');

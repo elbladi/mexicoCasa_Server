@@ -9,8 +9,7 @@
     "direccion": "Blvd. Fundadores #348 col. Valle de las flores",
     "desc": "Las gorditas de toño estan buenas y dos triquis bara",
     "img": "https://c8.alamy.com/compes/t20754/la-ilustracion-muestra-una-casa-pequena-hecho-en-un-estilo-de-dibujos-animados-aislado-sobre-fondo-blanco-t20754.jpg",
-    "fotoMenu": "url a la foto del menu",
-    "fotoId": "url a la foto del menu",
+    "fotoINE": "url a la foto del menu",
     "horarioTrabajo": {
         "lunes": {
             "from": "1PM",

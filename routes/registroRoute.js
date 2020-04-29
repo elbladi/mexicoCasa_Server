@@ -8,33 +8,35 @@ const router = express.Router();
 
 
 router.post('/newClient',
-    fileUpload.single('image'),
-    [
-        check('name').not().isEmpty(),
-        check('apellidos').not().isEmpty(),
-        check('email').normalizeEmail().isEmail(),
-        check('telefono').isLength({ min: 10 }),
-        check('direccion').not().isEmpty()
-    ],
+    // [
+    //     check('name').not().isEmpty(),
+    //     check('apellidos').not().isEmpty(),
+    //     check('email').normalizeEmail().isEmail(),
+    //     check('password').not().isEmpty(),
+    //     check('telefono').isLength({ min: 10 }),
+    //     check('direccion').not().isEmpty(),
+    //     check('fotoINE').not().isEmpty
+    // ],
     registroController.newClient);
 
-// router.get('/newClient', registroController.newClient);
 
-router.post('/newBussiness',
-    [
-        check('nameResponsable').not().isEmpty(),
-        check('name').not().isEmpty(),
-        check('direccion').not().isEmpty(),
-        check('desc').not().isEmpty(),
-        check('apellidos').not().isEmpty(),
-        check('email').normalizeEmail().isEmail(),
-        check('telefono').isLength({ min: 10 })
-    ], registroController.newBusiness);
+router.post('/newBusiness',
+    // [
+    //     check('nameResponsable').not().isEmpty(),
+    //     check('apellidos').not().isEmpty(),
+    //     check('email').normalizeEmail().isEmail(),
+    //     check('password').not().isEmpty(),
+    //     check('telefono').isLength({ min: 10 }),
+    //     check('name').not().isEmpty(),
+    //     check('direccion').not().isEmpty(),
+    //     check('desc').not().isEmpty(),
+    //     check('fotoNegocio').not().isEmpty(),
+    //     check('fotoINE').not().isEmpty(),
+
+    // ], 
+    registroController.newBusiness);
 
 router.use(checkout);
-
-
-router.post('/newNegocio', registroController.newBusiness);
 
 
 module.exports = router;

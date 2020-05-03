@@ -15,13 +15,13 @@ app.use(bodyParser.json());
 app.use('/uploads/images', express.static(path.join('uploads', 'images')));
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAVkeQpBCdQdqlTmg2J27pJtH-5Msu65nU",
-    authDomain: "mexico-casa.firebaseapp.com",
-    databaseURL: "https://mexico-casa.firebaseio.com",
-    projectId: "mexico-casa",
-    storageBucket: "mexico-casa.appspot.com",
-    messagingSenderId: "164769606702",
-    appId: "1:164769606702:web:b04b38b3df19e0bb6783bf"
+    apiKey: "AIzaSyBIr4TM1Npq93U7fnpuNBh1PtHH10tqpRc",
+    authDomain: "mexicoencasa-e7edb.firebaseapp.com",
+    databaseURL: "https://mexicoencasa-e7edb.firebaseio.com",
+    projectId: "mexicoencasa-e7edb",
+    storageBucket: "mexicoencasa-e7edb.appspot.com",
+    messagingSenderId: "966791408480",
+    appId: "1:966791408480:web:fac82ceee6edb024698c05"
 };
 
 require('./firebase').init(firebaseConfig);

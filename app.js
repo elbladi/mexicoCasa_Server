@@ -1,7 +1,11 @@
 const fs = require('fs');
 const express = require('express');
 const bodyParser = require('body-parser');
+
 const registroRoute = require('./routes/registroRoute');
+const clientRoute = require('./routes/clientRoute');
+const negocioRoute = require('./routes/negocioRoute');
+
 const HttpError = require('./util/http-error');
 const path = require('path');
 
@@ -32,6 +36,8 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/registro', registroRoute);
+app.use('/api/client', clientRoute);
+app.use('/api/business', negocioRoute);
 
 app.use((req, res, next) => {
     throw new HttpError('Could not find this route', 404);

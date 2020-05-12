@@ -1,6 +1,7 @@
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const HttpError = require('../util/http-error');
+const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
 
 const instance = require('../firebase');
@@ -19,15 +20,28 @@ const newClient = (req, res, next) => {
     console.log('Inicio instancia')
     let firebase = instance.getInstance();
 
-    const newUser = {
-        ...req.body,
-        verificado: false
+    let hashedPassword;
+    try {
+        bcrypt.hash(req.body.password, 12)
+            .then(hash => {
+                hashedPassword = hash;
+            })
+            .catch(err => next(new HttpError('Creacion de usuario fallo', 500)))
+    } catch (error) {
+        return next(new HttpError('Creacion de usuario fallo', 500));
     }
+
     console.log('INICIANDO...')
     try {
         firebase.auth().createUserWithEmailAndPassword(req.body.email, req.body.password)
             .then(succ => {
                 try {
+                    console.log(hashedPassword);
+                    const newUser = {
+                        ...req.body,
+                        password: hashedPassword,
+                        verificado: false
+                    }
                     createUser = firebase.firestore().collection('clients').doc(newUser.id).set(newUser)
                         .then(_ => {
 
@@ -63,7 +77,7 @@ const newBusiness = (req, res, next) => {
 
     console.log('INICIANDO...')
     try {
-        existingUser = await firebase.auth().createUserWithEmailAndPassword(req.body.email, req.body.password)
+        existingUser = firebase.auth().createUserWithEmailAndPassword(req.body.email, req.body.password)
             .then(succ => {
                 // agregar aqui
                 const newBusiness = {

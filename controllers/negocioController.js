@@ -22,10 +22,12 @@ const getFinished = (req, res, next) => {
             .get()
             .then(snapshot => {
                 if (snapshot.empty) {
-                    res.json({
-                        message: 'EMPTY ORDER',
-                        readyOrders: {}
-                    })
+                    res.json(
+                        {
+                            message: 'EMPTY ORDER',
+                            readyOrders: {}
+                        }
+                    )
                 } else {
                     snapshot.forEach(doc => {
 
@@ -154,7 +156,9 @@ const updateStage = (req, res, next) => {
 
 }
 
+
 exports.getPedidos = getPedidos;
 exports.getPreparando = getPreparando;
 exports.getFinished = getFinished;
 exports.updateStage = updateStage;
+exports.nuevaFuncion = nuevaFuncion;

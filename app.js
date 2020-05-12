@@ -49,7 +49,8 @@ app.use((error, req, res, next) => {
     res.json({ message: error.message || 'An unknown error occurred!' });
 });
 
-const server = app.listen(5000 || process.env.PORT);
+const server = app.listen(process.env.PORT || 5000);
+
 const io = require('./socket').init(server);
 io.on('connection', socket => {
     console.log('Client connected');

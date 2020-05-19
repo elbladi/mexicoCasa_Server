@@ -148,7 +148,7 @@ const updateStage = (req, res, next) => {
                 .catch(err => next(new HttpError('Algo salio mal al intentar mover el pedido. Por favor, intentalo de nuevo', 503)))
         });
         res.json({
-            message: "ALL ORDERS UPDATED"
+            message: "ALL ORDERS UPDATED",
         })
     } catch (error) {
         return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503))
@@ -161,4 +161,4 @@ exports.getPedidos = getPedidos;
 exports.getPreparando = getPreparando;
 exports.getFinished = getFinished;
 exports.updateStage = updateStage;
-exports.nuevaFuncion = nuevaFuncion;
+//exports.nuevaFuncion = nuevaFuncion;

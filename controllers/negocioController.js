@@ -22,10 +22,12 @@ const getFinished = (req, res, next) => {
             .get()
             .then(snapshot => {
                 if (snapshot.empty) {
-                    res.json({
-                        message: 'EMPTY ORDER',
-                        readyOrders: {}
-                    })
+                    res.json(
+                        {
+                            message: 'EMPTY ORDER',
+                            readyOrders: {}
+                        }
+                    )
                 } else {
                     snapshot.forEach(doc => {
 
@@ -146,7 +148,7 @@ const updateStage = (req, res, next) => {
                 .catch(err => next(new HttpError('Algo salio mal al intentar mover el pedido. Por favor, intentalo de nuevo', 503)))
         });
         res.json({
-            message: "ALL ORDERS UPDATED"
+            message: "ALL ORDERS UPDATED",
         })
     } catch (error) {
         return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503))
@@ -154,7 +156,9 @@ const updateStage = (req, res, next) => {
 
 }
 
+
 exports.getPedidos = getPedidos;
 exports.getPreparando = getPreparando;
 exports.getFinished = getFinished;
 exports.updateStage = updateStage;
+//exports.nuevaFuncion = nuevaFuncion;

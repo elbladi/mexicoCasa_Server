@@ -42,12 +42,23 @@ const newClient = (req, res, next) => {
                         password: hashedPassword,
                         verificado: false
                     }
-                    createUser = firebase.firestore().collection('clients').doc(newUser.id).set(newUser)
-                        .then(_ => {
-
+                    firebase.firestore().collection('clients').add(newUser)
+                        .then(resp => {
                             console.log('Usuario creado')
-
-                            res.json({ message: 'CREATION SUCCESS' });
+                            const user = {
+                                email: req.body.email,
+                                password: hashedPassword,
+                                isCustomer: true
+                            }
+                            firebase.firestore().collection('users').doc(resp.id).set(user).
+                                then(succ => {
+                                    res.json({ message: 'CREATION SUCCESS' })
+                                })
+                                .catch(err => {
+                                    firebase.firestore().collection('clients').doc(resp.id).delete().catch(err => {
+                                        return next(new HttpError('Creacion de usuario fallo, por favor intentalo mas tarde', 501));
+                                    })
+                                })
                         })
                         .catch(error => next(new HttpError(error.message, 500)))
                 } catch (error) {
@@ -73,6 +84,17 @@ const newBusiness = (req, res, next) => {
         );
     }
 
+    let hashedPassword;
+    try {
+        bcrypt.hash(req.body.password, 12)
+            .then(hash => {
+                hashedPassword = hash;
+            })
+            .catch(err => next(new HttpError('Creacion de usuario fallo', 500)))
+    } catch (error) {
+        return next(new HttpError('Creacion de usuario fallo', 500));
+    }
+
     let firebase = instance.getInstance();
 
     console.log('INICIANDO...')
@@ -86,13 +108,23 @@ const newBusiness = (req, res, next) => {
                     calificacion: null
                 }
                 try {
-                    firebase.firestore().collection('business').doc(newBusiness.id).set(newBusiness)
-                        .then(_ => {
-                            console.log("Negocio creado")
-
-                            res.json({
-                                message: "CREATION SUCCESS"
-                            });
+                    firebase.firestore().collection('business').add(newBusiness)
+                        .then(resp => {
+                            const business = {
+                                email: req.body.email,
+                                password: hashedPassword,
+                                isCustomer: false
+                            }
+                            firebase.firestore().collection('users').doc(resp.id).set(user).
+                                then(succ => {
+                                    console.log("Negocio creado")
+                                    res.json({ message: 'CREATION SUCCESS' })
+                                })
+                                .catch(err => {
+                                    firebase.firestore().collection('clients').doc(resp.id).delete().catch(err => {
+                                        return next(new HttpError('Creacion de usuario fallo, por favor intentalo mas tarde', 501));
+                                    })
+                                })
                         })
                         .catch(error => next(new HttpError(error.message, 500)))
                 } catch (error) {

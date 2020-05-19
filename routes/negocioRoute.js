@@ -5,6 +5,8 @@ const negocioController = require('../controllers/negocioController');
 
 const router = express.Router();
 
+// router.use(checkout);
+
 router.get('/pedidos/:negId', negocioController.getPedidos);
 router.get('/pedidos/preparando/:negId', negocioController.getPreparando);
 router.get('/pedidos/ready/:negId', negocioController.getFinished);

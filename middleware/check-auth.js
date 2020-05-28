@@ -1,4 +1,5 @@
 const HttpError = require('../util/http-error');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
@@ -8,7 +9,8 @@ module.exports = (req, res, next) => {
 
     let token;
     try {
-        token = req.headers.authorization.split(' ')[1];
+        token = req.headers.authorization;
+        token = token ? token.split(' ')[1] : null;
         if (!token) {
             throw new Error('auth fail');
         };
@@ -16,6 +18,7 @@ module.exports = (req, res, next) => {
         req.userData = { userId: decodedToken.userId }
         next();
     } catch (error) {
+        console.log(error)
         return next(new HttpError('Authentication failed', 401));
     };
 

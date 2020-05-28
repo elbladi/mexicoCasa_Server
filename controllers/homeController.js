@@ -4,7 +4,6 @@ const instance = require('../firebase');
 const jwt = require('jsonwebtoken');
 require('firebase/firestore');
 
-let user = null;
 
 const getUser = (credentials) => {
 
@@ -20,7 +19,7 @@ const getUser = (credentials) => {
                         reject(new HttpError('Usuario o contraseña incorrectos', 401));
 
                     } else {
-
+                        let user = null
                         snapshot.forEach(doc => {
                             user = {
                                 id: doc.id,

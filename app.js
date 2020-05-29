@@ -7,6 +7,8 @@ const clientRoute = require('./routes/clientRoute');
 const negocioRoute = require('./routes/negocioRoute');
 const homeRoute = require('./routes/homeRoute');
 const checkAuth = require('./middleware/check-auth');
+const { authRole } = require('./middleware/auth');
+const { ROLE } = require('./util/permissions/roles');
 
 const HttpError = require('./util/http-error');
 const path = require('path');
@@ -25,7 +27,7 @@ const firebaseConfig = {
     storageBucket: "catalogocovid2020.appspot.com",
     messagingSenderId: "1030415722995",
     appId: "1:1030415722995:web:b62bf0ba6bc4c373094a86"
-  };
+};
 
 require('./firebase').init(firebaseConfig);
 
@@ -39,12 +41,12 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/home', homeRoute);
+app.use('/api/registro', registroRoute);
 
 app.use(checkAuth);
 
-app.use('/api/registro', registroRoute);
-app.use('/api/client', clientRoute);
-app.use('/api/business', negocioRoute);
+app.use('/api/client', authRole(ROLE.CUSTOMER), clientRoute);
+app.use('/api/business', authRole(ROLE.BUSINESS), negocioRoute);
 
 app.use((req, res, next) => {
     throw new HttpError('Could not find this route', 404);

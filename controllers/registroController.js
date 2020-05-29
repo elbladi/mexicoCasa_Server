@@ -86,6 +86,7 @@ const newBusiness = (req, res, next) => {
     // }
 
     let hashedPassword;
+    let token;
     try {
         bcrypt.hash(req.body.password, 12)
             .then(hash => {
@@ -118,8 +119,21 @@ const newBusiness = (req, res, next) => {
                             }
                             firebase.firestore().collection('users').doc(resp.id).set(user).
                                 then(succ => {
-                                    console.log("Negocio creado")
-                                    res.json({ message: 'CREATION SUCCESS' })
+                                    console.log("Negocio creado");
+                                    token = jwt.sign(
+                                        {
+                                            email: user.email,
+                                            id: resp.id
+                                        },
+                                        process.env.JWT_KEY,
+                                        { expiresIn: '1h' }
+                                    );
+                                    res.json({
+                                        message: 'CREATION SUCCESS',
+                                        token: token,
+                                        isCustomer: false,
+                                        id: resp.id
+                                    })
                                 })
                                 .catch(err => {
                                     firebase.firestore().collection('business').doc(resp.id).delete().catch(err => {
@@ -133,7 +147,7 @@ const newBusiness = (req, res, next) => {
                 }
             })
             .catch(error => {
-                return next(new HttpError( "Email registrado. Por favor hacer Login" , 402));
+                return next(new HttpError("Email registrado. Por favor hacer Login", 402));
             })
     } catch (error) {
         return next(new HttpError(error.message, 500));

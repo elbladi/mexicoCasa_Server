@@ -41,7 +41,7 @@ app.use((req, res, next) => {
 app.use('/api/home', homeRoute);
 app.use('/api/registro', registroRoute);
 
-app.use(checkAuth);
+// app.use(checkAuth);
 
 app.use('/api/client', clientRoute);
 app.use('/api/business', negocioRoute);

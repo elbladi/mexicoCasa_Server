@@ -5,10 +5,7 @@ const { v4: uuid } = require('uuid');
 
 // const fb = require('firebase/app');
 // const x = fb.initializeApp(firebaseConfig);
-// x.firestore().collection('orders').doc().update({
-//     stage: "prepareOrders"
-// })
-// .then(x => x).t
+// x.firestore().collection('orders').doc().get().then
 
 const getFinished = (req, res, next) => {
 
@@ -156,9 +153,81 @@ const updateStage = (req, res, next) => {
 
 }
 
+const getProducts = (id) => {
+    return new Promise((resolved, error) => {
+        const firebase = instance.getInstance();
+        try {
+            console.log(id);
+            firebase.firestore().collection('products').doc(id)
+                .get()
+                .then(doc => {
+                    console.log(doc)
+                    if (!doc.exists) {
+                        resolved('No products added');
+                    } else {
+                        resolved(doc.data());
+                    }
+                })
+                .catch(() => {
+                    console.log('error haciendo request a products')
+                    error();
+                })
+        } catch (error) {
+            console.log('error en getProducts');
+        }
+    })
+}
+
+const getNegocioDetails = (req, res, next) => {
+
+    const negocioId = req.params.negId;
+    const firebase = instance.getInstance();
+
+    try {
+        firebase.firestore().collection('business').doc(negocioId)
+            .get()
+            .then(doc => {
+                if (!doc.exists) {
+                    console.log('Documento no existe')
+                    return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
+                } else {
+                    let negocioDetails = { ...doc.data() };
+                    getProducts(negocioId)
+                        .then(resp => {
+                            console.log('Resp: ' + resp);
+                            if (resp === 'No products added') {
+                                res.json({
+                                    products: [],
+                                    details: negocioDetails
+                                })
+                            } else {
+                                const negocio = {
+                                    details: negocioDetails,
+                                    ...resp
+                                }
+                                console.log(negocio);
+                                res.json({
+                                    negocio: negocio
+                                })
+                            }
+                        })
+                        .catch(err => {
+                            console.log('getProducts catch')
+                            return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
+                        })
+                }
+            })
+
+    } catch (error) {
+        console.log('algo salio mal en general alv')
+        return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
+    }
+
+}
 
 exports.getPedidos = getPedidos;
 exports.getPreparando = getPreparando;
 exports.getFinished = getFinished;
 exports.updateStage = updateStage;
+exports.getNegocioDetails = getNegocioDetails;
 //exports.nuevaFuncion = nuevaFuncion;

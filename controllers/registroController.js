@@ -1,7 +1,7 @@
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const HttpError = require('../util/http-error');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
 
 const instance = require('../firebase');
@@ -39,9 +39,10 @@ const newClient = (req, res, next) => {
                     console.log(hashedPassword);
                     const newUser = {
                         ...req.body,
-                        password: hashedPassword,
+                        // password: hashedPassword,
                         verificado: false
                     }
+                    delete newUser['password'];
                     firebase.firestore().collection('clients').add(newUser)
                         .then(resp => {
                             console.log('Usuario creado')
@@ -77,12 +78,12 @@ const newClient = (req, res, next) => {
 
 
 const newBusiness = (req, res, next) => {
-    const error = validationResult(req);
-    if (!error.isEmpty()) {
-        return next(
-            new HttpError('Error, Por favor revisa tus datos de entrada', 422)
-        );
-    }
+    // const error = validationResult(req);
+    // if (!error.isEmpty()) {
+    //     return next(
+    //         new HttpError('Error, Por favor revisa tus datos de entrada', 422)
+    //     );
+    // }
 
     let hashedPassword;
     try {
@@ -105,12 +106,12 @@ const newBusiness = (req, res, next) => {
                 const newBusiness = {
                     ...req.body,
                     verificado: false,
-                    calificacion: null
                 }
+                delete newBusiness['password'];
                 try {
                     firebase.firestore().collection('business').add(newBusiness)
                         .then(resp => {
-                            const business = {
+                            const user = {
                                 email: req.body.email,
                                 password: hashedPassword,
                                 isCustomer: false
@@ -121,7 +122,7 @@ const newBusiness = (req, res, next) => {
                                     res.json({ message: 'CREATION SUCCESS' })
                                 })
                                 .catch(err => {
-                                    firebase.firestore().collection('clients').doc(resp.id).delete().catch(err => {
+                                    firebase.firestore().collection('business').doc(resp.id).delete().catch(err => {
                                         return next(new HttpError('Creacion de usuario fallo, por favor intentalo mas tarde', 501));
                                     })
                                 })
@@ -132,7 +133,7 @@ const newBusiness = (req, res, next) => {
                 }
             })
             .catch(error => {
-                return next(new HttpError(error.message, 500));
+                return next(new HttpError( "Email registrado. Por favor hacer Login" , 402));
             })
     } catch (error) {
         return next(new HttpError(error.message, 500));

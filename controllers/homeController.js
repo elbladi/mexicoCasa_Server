@@ -1,5 +1,5 @@
 const HttpError = require('../util/http-error');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const instance = require('../firebase');
 const jwt = require('jsonwebtoken');
 require('firebase/firestore');

@@ -180,7 +180,6 @@ const getNegocioDetails = (req, res, next) => {
 
     const negocioId = req.params.negId;
     const firebase = instance.getInstance();
-    console.log('Llego request')
     try {
         firebase.firestore().collection('business').doc(negocioId)
             .get()
@@ -192,7 +191,6 @@ const getNegocioDetails = (req, res, next) => {
                     let negocioDetails = { ...doc.data() };
                     getProducts(negocioId)
                         .then(resp => {
-                            console.log('Resp: ' + resp);
                             if (resp === 'No products added') {
                                 res.json({
                                     products: [],
@@ -203,7 +201,6 @@ const getNegocioDetails = (req, res, next) => {
                                     details: negocioDetails,
                                     ...resp
                                 }
-                                console.log(negocio);
                                 res.json({
                                     negocio: negocio
                                 })

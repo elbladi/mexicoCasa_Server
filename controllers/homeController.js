@@ -83,6 +83,7 @@ const login = (req, res, next) => {
                                     {
                                         email: user.email,
                                         id: user.id,
+                                        isCustomer: user.isCustomer,
                                     },
                                     process.env.JWT_KEY,
                                     { expiresIn: '1h' }

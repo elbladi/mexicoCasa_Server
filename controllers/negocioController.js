@@ -157,11 +157,9 @@ const getProducts = (id) => {
     return new Promise((resolved, error) => {
         const firebase = instance.getInstance();
         try {
-            console.log(id);
             firebase.firestore().collection('products').doc(id)
                 .get()
                 .then(doc => {
-                    console.log(doc)
                     if (!doc.exists) {
                         resolved('No products added');
                     } else {
@@ -182,7 +180,7 @@ const getNegocioDetails = (req, res, next) => {
 
     const negocioId = req.params.negId;
     const firebase = instance.getInstance();
-
+    console.log('Llego request')
     try {
         firebase.firestore().collection('business').doc(negocioId)
             .get()

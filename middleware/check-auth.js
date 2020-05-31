@@ -1,6 +1,7 @@
 const HttpError = require('../util/http-error');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+
 
 module.exports = (req, res, next) => {
     if (req.method === 'OPTIONS') {

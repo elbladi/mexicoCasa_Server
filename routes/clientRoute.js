@@ -8,6 +8,7 @@ const router = express.Router();
 // router.use(checkout)
 
 router.post('/checkout', clientController.checkout);
+router.get('/businesses', clientController.getBusinesses);
 
 
 module.exports = router

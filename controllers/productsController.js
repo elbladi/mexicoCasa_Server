@@ -1,6 +1,9 @@
 const HttpError = require('../util/http-error');
 const instance = require('../firebase');
+const { fileUploader } = require('../middleware/fileUploader');
+const { ROLE } = require('../util/permissions/roles');
 require('firebase/firestore');
+
 
 const gettingProducts = (idBusiness) => {
     const firebase = instance.getInstance();
@@ -36,19 +39,19 @@ const updateBusinessProduct = (idBusiness, products) => {
 }
 
 const addProductNewBusiness = (idBusiness, products) => {
+    const firebase = instance.getInstance();
     return new Promise((resolver, reject) => {
-        const firebase = instance.getInstance();
 
+        if (!idBusiness && !products) {
+            reject(new HttpError('Algo salio mal, intente mas tarde', 503));
+        }
         firebase.firestore().collection('products').doc(idBusiness).set(products)
             .then(doc => {
-                if (doc.id) {
-                    resolver("Se agrego el producto exitosamente");
+                resolver("Se agrego el producto exitosamente");
 
-                } else {
-                    reject(new HttpError('Algo salio mal, intente mas tarde', 503));
-                }
             })
             .catch(error => {
+                console.log(error);
                 reject(new HttpError('Algo salio mal, intente mas tarde', 503));
             });
     });
@@ -59,45 +62,64 @@ const addProduct = (req, res, next) => {
     const product = {
         name: req.body.name,
         description: req.body.desc,
-        price: req.body.price
+        price: parseFloat(req.body.price),
+        url: '',
     }
-    if (idBusiness && product) {
-        gettingProducts(idBusiness)
-            .then(products => {
-                if (products) {
-                    const productFound = products.find(element => element.name === product.name);
+    if (idBusiness && product && req.files) {
+        fileUploader(ROLE.BUSINESS, { id: idBusiness, childFolder: 'products' }, req.files)
+            .then(fileUrl => {
+                if (!fileUrl) {
+                    return next(new HttpError('Algo salio mal, intente mas tarde', 503));
+                }
 
-                    if (!productFound) {
-                        products.unshift(product);
-                        updateBusinessProduct(idBusiness, {
-                            products: products
-                        }).then(message => {
-                            res.status(201).json({
-                                message: 'Se agrego el producto exitosamente',
+                product.url = fileUrl;
+
+                gettingProducts(idBusiness)
+                    .then(products => {
+                        if (products) {
+                            const productFound = products.find(element => element.name === product.name);
+
+                            if (!productFound) {
+                                products.unshift(product);
+                                updateBusinessProduct(idBusiness, {
+                                    products: products
+                                }).then(message => {
+                                    res.status(201).json({
+                                        message: 'Se agrego el producto exitosamente',
+                                    });
+                                }).catch(error => {
+                                    console.log("error")
+                                    return next(error);
+                                });
+
+                            } else {
+                                res.status(406).json({
+                                    message: "Ya existe un producto con ese nombre"
+                                });
+                            }
+                        } else {
+                            addProductNewBusiness(idBusiness, {
+                                products: [product]
+                            }).then(message => {
+                                res.status(201).json({
+                                    message: message
+                                });
+                            }).catch(error => {
+                                console.log(error);
+                                return next(error);
                             });
-                        }).catch(error => {
-                            return next(error);
-                        });
-
-                    } else {
-                        res.status(406).json({
-                            message: "Ya existe un producto con ese nombre"
-                        });
-                    }
-                } else {
-                    addProductNewBusiness(idBusiness, {
-                        products: [product]
-                    }).then(message => {
-                        res.status(201).json({
-                            message: message
-                        });
+                        }
                     }).catch(error => {
+                        console.log(error)
                         return next(error);
                     });
-                }
-            }).catch(error => {
+            })
+            .catch(error => {
+                console.log(error);
                 return next(error);
-            });
+
+            })
+
     }
 }
 

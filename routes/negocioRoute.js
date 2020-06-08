@@ -1,12 +1,13 @@
 const express = require('express');
+const fileUpload = require('express-fileupload');
 const checkout = require('../middleware/check-auth');
+
 
 const negocioController = require('../controllers/negocioController');
 const productsController = require('../controllers/productsController');
 
 const router = express.Router();
-
-// router.use(checkout);
+router.use(fileUpload());
 
 router.get('/pedidos/:negId', negocioController.getPedidos);
 router.get('/getNegocio/:negId', negocioController.getNegocioDetails);

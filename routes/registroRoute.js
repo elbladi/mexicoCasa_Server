@@ -1,5 +1,4 @@
 const express = require('express');
-const checkout = require('../middleware/check-auth');
 const { check } = require('express-validator');
 const fileUpload = require('../middleware/file-upload');
 const registroController = require('../controllers/registroController');
@@ -36,7 +35,6 @@ router.post('/newBusiness',
     // ], 
     registroController.newBusiness);
 
-router.use(checkout);
-
+router.get('/verifyEmail/:email', registroController.verifyEmailExist)
 
 module.exports = router;

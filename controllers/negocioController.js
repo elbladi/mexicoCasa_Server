@@ -157,11 +157,9 @@ const getProducts = (id) => {
     return new Promise((resolved, error) => {
         const firebase = instance.getInstance();
         try {
-            console.log(id);
             firebase.firestore().collection('products').doc(id)
                 .get()
                 .then(doc => {
-                    console.log(doc)
                     if (!doc.exists) {
                         resolved('No products added');
                     } else {
@@ -182,7 +180,6 @@ const getNegocioDetails = (req, res, next) => {
 
     const negocioId = req.params.negId;
     const firebase = instance.getInstance();
-
     try {
         firebase.firestore().collection('business').doc(negocioId)
             .get()
@@ -194,7 +191,6 @@ const getNegocioDetails = (req, res, next) => {
                     let negocioDetails = { ...doc.data() };
                     getProducts(negocioId)
                         .then(resp => {
-                            console.log('Resp: ' + resp);
                             if (resp === 'No products added') {
                                 res.json({
                                     products: [],
@@ -205,7 +201,6 @@ const getNegocioDetails = (req, res, next) => {
                                     details: negocioDetails,
                                     ...resp
                                 }
-                                console.log(negocio);
                                 res.json({
                                     negocio: negocio
                                 })

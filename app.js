@@ -1,5 +1,6 @@
 const fs = require('fs');
 const express = require('express');
+const fileUpload = require('express-fileupload');
 const bodyParser = require('body-parser');
 
 const registroRoute = require('./routes/registroRoute');
@@ -17,7 +18,6 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/uploads/images', express.static(path.join('uploads', 'images')));
 
 const firebaseConfig = {
     apiKey: "AIzaSyCdrGa36-Lo-DH9J3BoEj1Wir6hwfIYBpA",
@@ -43,7 +43,7 @@ app.use((req, res, next) => {
 app.use('/api/home', homeRoute);
 app.use('/api/registro', registroRoute);
 
-// app.use(checkAuth);
+//app.use(checkAuth);
 
 app.use('/api/client', authRole(ROLE.CUSTOMER), clientRoute);
 app.use('/api/business', clientRoute);

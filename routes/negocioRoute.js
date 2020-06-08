@@ -15,7 +15,7 @@ router.get('/pedidos/ready/:negId', negocioController.getFinished);
 router.post('/updateOrder', negocioController.updateStage);
 
 
-router.get('/getProducts:negId', productsController.getProducts);
+router.get('/getProducts/:negId', productsController.getProducts);
 router.post('/addProduct', productsController.addProduct);
 
 module.exports = router;

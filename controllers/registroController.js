@@ -156,5 +156,24 @@ const newBusiness = (req, res, next) => {
 
 };
 
+const verifyEmailExist = (req, res, next) => {
+    let email = req.params.email;
+    email = email.trim();
+    const firebase = instance.getInstance();
+    try {
+        firebase.firestore().collection('users')
+            .where('email', '==', email)
+            .get()
+            .then(snapshot => {
+                if (snapshot.empty) res.json({ message: 'Ok' });
+                else res.json({ message: 'El correo ya se encuentra registrado' })
+            })
+    } catch (error) {
+        return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
+    }
+
+}
+
 exports.newClient = newClient;
 exports.newBusiness = newBusiness;
+exports.verifyEmailExist = verifyEmailExist;

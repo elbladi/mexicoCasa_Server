@@ -125,7 +125,17 @@ const addProduct = (req, res, next) => {
 
 
 const getProducts = (req, res, next) => {
-    console.log(2)
+    const idBusiness = req.params.negId
+    if (idBusiness) {
+        gettingProducts(idBusiness)
+            .then(products => {
+                if (products) {
+                    res.status(201).json({
+                    products: products
+                })
+            }
+        })
+    }
 }
 
 exports.getProducts = getProducts;

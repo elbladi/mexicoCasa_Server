@@ -43,11 +43,11 @@ app.use((req, res, next) => {
 app.use('/api/home', homeRoute);
 app.use('/api/registro', registroRoute);
 
-//app.use(checkAuth);
+app.use(checkAuth);
 
 app.use('/api/client', authRole(ROLE.CUSTOMER), clientRoute);
 app.use('/api/business', clientRoute);
-app.use('/api/products', negocioRoute)
+app.use('/api/products', authRole(ROLE.BUSINESS), negocioRoute);
 
 app.use((req, res, next) => {
     throw new HttpError('Could not find this route', 404);

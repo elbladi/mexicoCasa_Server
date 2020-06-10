@@ -19,17 +19,18 @@ firebase.initializeApp({
 });
 
 
-const fileUploader = (role, destination, files) => {
+const fileUploader = (role, destinationFile, files) => {
     return new Promise((resolver, reject) => {
         if (files === null) {
-            reject(new HttpError('No hay un archivo a subir', 406));
+            const defaulImage = 'https://firebasestorage.googleapis.com/v0/b/catalogocovid2020.appspot.com/o/no_image_food.svg?alt=media&token=ad03d09e-b410-477c-b687-84b40c1aca27';
+            resolver(defaulImage);
         }
         const child = role ? 'clients' : 'business';
-        const id = destination.id;
-        const childFolder = destination.childFolder;
+        const id = destinationFile.id;
+        const childFolder = destinationFile.childFolder;
         const uuidToken = uuid();
         const file = files.file;
-        const destination = `${child}/${id}/${childFolder}/${file.name}`;
+        const storageDestination = `${child}/${id}/${childFolder}/${file.name}`;
         const filePath = `./uploads/images/${file.name}`;
 
         file.mv(filePath)
@@ -37,7 +38,7 @@ const fileUploader = (role, destination, files) => {
                 const firebaseBucket = firebase.storage().bucket(bucket);
                 firebaseBucket.upload(filePath, {
                     resumable: true,
-                    destination: destination,
+                    destination: storageDestination,
                     uploadType: "media",
                     metadata: {
                         metadata: {
@@ -54,20 +55,16 @@ const fileUploader = (role, destination, files) => {
                         resolver(url);
                         fs.unlink(filePath, error => {
                             if (error) {
-                                console.log(error)
                                 reject(error);
                             }
                         });
 
                     })
                     .catch(error => {
-                        console.log(error)
                         reject(new HttpError('Algo salio mal, intente más tarde', 503));
                     });
             })
             .catch(error => {
-                console.log(error)
-
                 reject(new HttpError('Algo salio mal, intente más tarde', 503));
             });
     });

@@ -65,7 +65,7 @@ const addProduct = (req, res, next) => {
         price: parseFloat(req.body.price),
         url: '',
     }
-    if (idBusiness && product && req.files) {
+    if (idBusiness && product) {
         fileUploader(ROLE.BUSINESS, { id: idBusiness, childFolder: 'products' }, req.files)
             .then(fileUrl => {
                 if (!fileUrl) {
@@ -115,11 +115,14 @@ const addProduct = (req, res, next) => {
                     });
             })
             .catch(error => {
-                console.log(error);
+                console.log(error)
                 return next(error);
 
-            })
-
+            });
+    } else {
+        res.status(406).json({
+            message: "Los campos son requeridos"
+        });
     }
 }
 
@@ -131,10 +134,10 @@ const getProducts = (req, res, next) => {
             .then(products => {
                 if (products) {
                     res.status(201).json({
-                    products: products
-                })
-            }
-        })
+                        products: products
+                    })
+                }
+            })
     }
 }
 

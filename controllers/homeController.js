@@ -9,7 +9,7 @@ const getUserType = (req, res, next) => {
         const firebase = instance.getInstance();
         const userId = req.params.userId;
         if (userId) {
-            
+
             firebase.firestore().collection('users').doc(userId).get()
                 .then(doc => {
                     if (doc.exists) {
@@ -39,7 +39,7 @@ const getUser = (credentials) => {
     const firebase = instance.getInstance();
     return new Promise((resolve, reject) => {
         try {
-            
+
             firebase.firestore().collection('users')
                 .where('email', '==', credentials.email)
                 .get()
@@ -72,38 +72,33 @@ const getUser = (credentials) => {
 const login = (req, res, next) => {
     const credentials = req.body;
     let token;
-    getUser(credentials)
+    const user = getUser(credentials)
         .then(user => {
-            try {
-                if (credentials) {
-                    bcrypt.compare(credentials.password, user.password)
-                        .then(isEqual => {
-                            if (isEqual) {
-                                token = jwt.sign(
-                                    {
-                                        email: user.email,
-                                        id: user.id,
-                                        isCustomer: user.isCustomer,
-                                    },
-                                    process.env.JWT_KEY,
-                                    { expiresIn: '1h' }
-                                );
-                                res.status(201).json({
-                                    token: token,
+            if (credentials) {
+                bcrypt.compare(credentials.password, user.password)
+                    .then(isEqual => {
+                        if (isEqual) {
+                            token = jwt.sign(
+                                {
+                                    email: user.email,
                                     id: user.id,
                                     isCustomer: user.isCustomer,
-                                });
-                            } else {
-                                return next(new HttpError('Usuario o contraseña incorrecto', 401));
-                            }
-                        })
-                        .catch(err => {
-                            return next(new HttpError('Algo salio mal, intente mas tarde', 503));
-                        })
-                }
-            } catch (error) {
-                return next(error);
-
+                                },
+                                process.env.JWT_KEY,
+                                { expiresIn: '1h' }
+                            );
+                            res.status(201).json({
+                                token: token,
+                                id: user.id,
+                                isCustomer: user.isCustomer,
+                            });
+                        } else {
+                            return next(new HttpError('Usuario o contraseña incorrecto', 401));
+                        }
+                    })
+                    .catch(err => {
+                        return next(new HttpError('Algo salio mal, intente mas tarde', 503));
+                    })
             }
         })
         .catch(error => {

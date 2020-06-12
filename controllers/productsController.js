@@ -5,137 +5,144 @@ const { ROLE } = require('../util/permissions/roles');
 require('firebase/firestore');
 
 
-const gettingProducts = (idBusiness) => {
+const gettingProducts = async (idBusiness) => {
     const firebase = instance.getInstance();
-    return new Promise((resolver, reject) => {
 
-        firebase.firestore().collection('products').doc(idBusiness).get()
+    if (idBusiness) {
+
+        const products = await firebase.firestore().collection('products').doc(idBusiness).get()
             .then(doc => {
                 if (doc.exists) {
-                    resolver(doc.data().products);
+                    return doc.data().products;
                 } else {
-                    resolver(null);
+                    return null;
                 }
             }).catch(error => {
-                reject(new HttpError('Algo salio mal, intente mas tarde', 503));
+                throw new HttpError('Algo salio mal, intente mas tarde', 503);
             });
-
-    });
-}
-
-const updateBusinessProduct = (idBusiness, products) => {
-    const firebase = instance.getInstance();
-    return new Promise((resolver, reject) => {
-
-        firebase.firestore().collection('products').doc(idBusiness).update(products)
-            .then(doc => {
-                resolver("Producto actualizado exitosamente");
-            })
-            .catch(error => {
-                reject(new HttpError('Algo salio mal, intente mas tarde', 503))
-            });
-
-    });
-}
-
-const addProductNewBusiness = (idBusiness, products) => {
-    const firebase = instance.getInstance();
-    return new Promise((resolver, reject) => {
-
-        if (!idBusiness && !products) {
-            reject(new HttpError('Algo salio mal, intente mas tarde', 503));
-        }
-        firebase.firestore().collection('products').doc(idBusiness).set(products)
-            .then(doc => {
-                resolver("Se agrego el producto exitosamente");
-
-            })
-            .catch(error => {
-                console.log(error);
-                reject(new HttpError('Algo salio mal, intente mas tarde', 503));
-            });
-    });
-}
-
-const addProduct = (req, res, next) => {
-    const idBusiness = req.body.idBusiness;
-    const product = {
-        name: req.body.name,
-        description: req.body.desc,
-        price: parseFloat(req.body.price),
-        url: '',
+        return products;
     }
-    if (idBusiness && product && req.files) {
-        fileUploader(ROLE.BUSINESS, { id: idBusiness, childFolder: 'products' }, req.files)
-            .then(fileUrl => {
-                if (!fileUrl) {
+    return null;
+}
+
+const updateBusinessProduct = async (idBusiness, products) => {
+    const firebase = instance.getInstance();
+
+    const isProductUpdate = await firebase.firestore().collection('products').doc(idBusiness).update(products)
+        .then(doc => {
+            return true;
+        })
+        .catch(error => {
+            throw new HttpError('Algo salio mal, intente mas tarde', 503);
+        });
+
+    return isProductUpdate ? isProductUpdate : false;
+
+}
+
+const addProductNewBusiness = async (idBusiness, products) => {
+    const firebase = instance.getInstance();
+
+    if (!idBusiness && !products) {
+        throw new HttpError('Algo salio mal, intente mas tarde', 503);
+    }
+    const isProductAdded = await firebase.firestore().collection('products').doc(idBusiness).set(products)
+        .then(doc => {
+            return true;
+
+        })
+        .catch(error => {
+            throw new HttpError('Algo salio mal, intente mas tarde', 503);
+        });
+
+    return productAdded ? productAdded : false;
+}
+
+const addProduct = async (req, res, next) => {
+    try {
+        const idBusiness = req.body.idBusiness;
+        const product = {
+            name: req.body.name,
+            description: req.body.desc,
+            price: parseFloat(req.body.price),
+            url: '',
+        }
+
+        if (idBusiness && product) {
+
+            const fileUrl = await fileUploader(ROLE.BUSINESS, { id: idBusiness, childFolder: 'products' }, req.files);
+
+            if (!fileUrl) {
+                return next(new HttpError('Algo salio mal, intente mas tarde', 503));
+            }
+
+            product.url = fileUrl;
+
+            const products = await gettingProducts(idBusiness);
+
+            if (products) {
+
+                const productFound = products.find(element => element.name === product.name);
+
+                if (!productFound) {
+                    products.unshift(product);
+
+                    const isProductUpdated = updateBusinessProduct(idBusiness, {
+                        products: products
+                    });
+
+                    if (isProductUpdated) {
+                        res.status(201).json({
+                            message: 'Se agrego el producto exitosamente',
+                        });
+                    }
+
+                } else {
+                    res.status(406).json({
+                        message: "Ya existe un producto con ese nombre"
+                    });
+                }
+            } else {
+                const isProductAdded = addProductNewBusiness(idBusiness, {
+                    products: [product]
+                });
+
+                if (isProductAdded) {
+                    res.status(201).json({
+                        message: "Se agrego el producto exitosamente",
+                    });
+                } else {
                     return next(new HttpError('Algo salio mal, intente mas tarde', 503));
                 }
-
-                product.url = fileUrl;
-
-                gettingProducts(idBusiness)
-                    .then(products => {
-                        if (products) {
-                            const productFound = products.find(element => element.name === product.name);
-
-                            if (!productFound) {
-                                products.unshift(product);
-                                updateBusinessProduct(idBusiness, {
-                                    products: products
-                                }).then(message => {
-                                    res.status(201).json({
-                                        message: 'Se agrego el producto exitosamente',
-                                    });
-                                }).catch(error => {
-                                    console.log("error")
-                                    return next(error);
-                                });
-
-                            } else {
-                                res.status(406).json({
-                                    message: "Ya existe un producto con ese nombre"
-                                });
-                            }
-                        } else {
-                            addProductNewBusiness(idBusiness, {
-                                products: [product]
-                            }).then(message => {
-                                res.status(201).json({
-                                    message: message
-                                });
-                            }).catch(error => {
-                                console.log(error);
-                                return next(error);
-                            });
-                        }
-                    }).catch(error => {
-                        console.log(error)
-                        return next(error);
-                    });
-            })
-            .catch(error => {
-                console.log(error);
-                return next(error);
-
-            })
-
+            }
+        } else {
+            res.status(406).json({
+                message: "Los campos son requeridos"
+            });
+        }
+    } catch (error) {
+        return next(new HttpError('Algo salio mal, intente mas tarde', 503));;
     }
+
 }
 
 
-const getProducts = (req, res, next) => {
+const getProducts = async (req, res, next) => {
     const idBusiness = req.params.negId
-    if (idBusiness) {
-        gettingProducts(idBusiness)
-            .then(products => {
-                if (products) {
-                    res.status(201).json({
-                    products: products
-                })
-            }
-        })
+    try {
+        if (idBusiness) {
+
+            const products = await gettingProducts(idBusiness);
+
+            res.status(201).json({
+                products: products
+            })
+
+        }
+    } catch (error) {
+        return next(new HttpError('Algo salio mal, intente mas tarde', 503));
     }
+
 }
 
 exports.getProducts = getProducts;

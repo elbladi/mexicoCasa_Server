@@ -95,241 +95,239 @@ const deleteBusinessFromCollection = (businessId) => {
     });
 };
 
-// const newBusiness = async (req, res, next) => {
-//     /*
-//     * Verify the request contain photoINE
-//     */
-
-//     if (!req.files) return next(new HttpError('no llego el file', 500));
-//     if (!req.files['photoINE']) return next(new HttpError('Foto de ID requerida', 500));
-//     //CAMBIAR ESTE EMAIL
-//     const email = req.body.email
-
-//     /*
-//     * Verify the user is not registered
-//     */
-
-//     let firebase = instance.getInstance();
-//     let existe;
-//     try {
-//         existe = await firebase.firestore().collection('users')
-//             .where('email', '==', email)
-//             .get()
-//             .then(snapshot => {
-//                 if (snapshot.empty) return false
-//                 else return true;
-//             })
-//     } catch (error) {
-//         return next(new HttpError('Algo salio mal, por favor verificar datos', 500));
-//     }
-
-//     if (existe) {
-//         return next(new HttpError('Email registrado. Por favor hacer Login', 500));
-//     }
-
-//     /**
-//      * Create the business in the business collection
-//      * Get the created business id 
-//      */
-
-//     let newBusiness = {
-//         ...req.body,
-//         verificado: false,
-//     }
-//     delete newBusiness['password'];
-
-//     let newUserId;
-//     try {
-//         newUserId = await firebase.firestore().collection('business').add(newBusiness)
-//             .then(resp => {
-//                 return resp.id;
-//             })
-//             .catch(_ => {
-//                 next(new HttpError('Creacion de usuario fallo', 500))
-//             })
-//     } catch (error) {
-//         return next(new HttpError('Creacion de usuario fallo', 500));
-//     }
-
-//     if (!newUserId) {
-//         return next(new HttpError('Creacion de usuario fallo', 500));
-//     }
-
-//     /**
-//      * Upload the images or image using the created business id
-//      * if upload fails: delete the business id in business collection
-//      */
-
-//     let photoINE;
-//     try {
-//         photoINE = await fileUploader(ROLE.BUSINESS, { id: newUserId, childFolder: 'register' }, { file: req.files['photoINE'] })
-//             .then(fileUrl => {
-//                 if (!fileUrl) {
-//                     return false
-//                 }
-//                 return fileUrl
-//             })
-//             .catch(err => {
-//                 console.log(err);
-//                 return false
-//             })
-//     } catch (error) {
-//         return next(new HttpError('Algo salio mal, intente mas tarde', 503));
-//     }
-
-//     if (!photoINE) {
-//         deleteBusinessFromCollection(newUserId)
-//             .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//             .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//         return next(new HttpError('Algo salio mal, intente mas tarde', 503))
-//     }
-
-//     let photoBusiness
-//     if (req.files['photoBusiness']) {
-//         try {
-//             photoBusiness = await fileUploader(ROLE.BUSINESS, { id: newUserId, childFolder: 'register' }, { file: req.files['photoBusiness'] })
-//                 .then(fileUrl => {
-//                     if (!fileUrl) {
-//                         return false
-//                     }
-//                     return fileUrl
-//                 })
-//                 .catch(err => {
-//                     console.log(err);
-//                     return false
-//                 })
-//         } catch (error) {
-//             return next(new HttpError('Algo salio mal, intente mas tarde', 503));
-//         }
-//     } else {
-//         photoBusiness = 'empty'
-//     }
-
-//     if (!photoBusiness) {
-//         deleteBusinessFromCollection(newUserId)
-//             .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//             .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//         return next(new HttpError('Algo salio mal, intente mas tarde', 503))
-//     }
-
-//     /**
-//      * Update the photos url of created business in business collection 
-//      */
-//     let updated;
-//     try {
-//         updated = await firebase.firestore().collection('business').doc(newUserId)
-//             .update({
-//                 photoINE: photoINE,
-//                 photoBusiness: photoBusiness
-//             })
-//             .then(_ => true)
-//             .catch(_ => false);
-//     } catch (error) {
-//         console.log(error);
-//         deleteBusinessFromCollection(newUserId)
-//             .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//             .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//         return next(new HttpError('Algo salio mal, intente mas tarde', 503))
-//     }
-
-//     if (!updated) {
-//         deleteBusinessFromCollection(newUserId)
-//             .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//             .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//         return next(new HttpError('Algo salio mal, intente mas tarde', 503))
-//     }
-
-//     /**
-//      * Hash the password 
-//      */
-
-//     let hashedPassword;
-//     try {
-//         hashedPassword = await bcrypt.hash('req.body.password', 12)
-//             .then(hash => {
-//                 return hash;
-//             })
-//             .catch(err => '')
-//     } catch (error) {
-//         return next(new HttpError('Creacion de usuario fallo', 500));
-//     }
-
-//     if (!hashedPassword) {
-//         deleteBusinessFromCollection(newUserId)
-//             .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//             .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//         return next(new HttpError('Creacion de usuario fallo', 500));
-//     }
-
-//     /**
-//      * Upload the user to users collection
-//      * if upload fails: delete the image(s) and delete the business id in business collection
-//      */
-
-//     const user = {
-//         email: email,
-//         password: hashedPassword,
-//         isCustomer: false
-//     }
-
-//     let newUser;
-//     try {
-//         newUser = await firebase.firestore().collection('users').doc(newUserId).set(user)
-//             .then(_ => {
-//                 return true;
-//             })
-//             .catch(_ => {
-//                 deleteBusinessFromCollection(newUserId)
-//                     .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//                     .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//             })
-
-//     } catch (_) {
-//         deleteBusinessFromCollection(newUserId)
-//             .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//             .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
-//     }
-
-//     if (!newUser) return next(new HttpError('Creacion de usuario fallo', 500));
-
-//     /**
-//      * Create the token and send it 
-//      */
-
-//     const token = jwt.sign(
-//         {
-//             email: user.email,
-//             id: newUserId
-//         },
-//         process.env.JWT_KEY,
-//         { expiresIn: '1h' }
-//     );
-
-//     /**
-//      * Set newBusiness 
-//      */
-//     newBusiness = {
-//         ...newBusiness,
-//         photoINE: photoINE,
-//         photoBusiness: photoBusiness
-//     }
-
-//     res.json({
-//         message: 'CREATION SUCCESS',
-//         business: newBusiness,
-//         token: token,
-//         isCustomer: false,
-//         id: newUserId
-//     })
-
-// };
-
-
 const newBusiness = async (req, res, next) => {
+    /*
+    * Verify the request contain photoINE
+    */
 
-    console.log(req.body);
-    res.json({message: 'Ok'});
-}
+    if (!req.files) return next(new HttpError('no llego el file', 500));
+    if (!req.files['photoINE']) return next(new HttpError('Foto de ID requerida', 500));
+    //CAMBIAR ESTE EMAIL
+    let body = {}
+    Object.keys(req.body).forEach((value, _) => {
+        body[value] = JSON.parse(req.body[value]);
+    })
+
+    const email = body.email
+
+    /*
+    * Verify the user is not registered
+    */
+
+    let firebase = instance.getInstance();
+    let existe;
+    try {
+        existe = await firebase.firestore().collection('users')
+            .where('email', '==', email)
+            .get()
+            .then(snapshot => {
+                if (snapshot.empty) return false
+                else return true;
+            })
+    } catch (error) {
+        return next(new HttpError('Algo salio mal, por favor verificar datos', 500));
+    }
+
+    if (existe) {
+        return next(new HttpError('Email registrado. Por favor hacer Login', 500));
+    }
+
+    /**
+     * Create the business in the business collection
+     * Get the created business id 
+     */
+
+    let newBusiness = {
+        ...body,
+        verificado: false,
+    }
+    delete newBusiness['password'];
+
+    let newUserId;
+    try {
+        newUserId = await firebase.firestore().collection('business').add(newBusiness)
+            .then(resp => {
+                return resp.id;
+            })
+            .catch(_ => {
+                next(new HttpError('Creacion de usuario fallo', 500))
+            })
+    } catch (error) {
+        return next(new HttpError('Creacion de usuario fallo', 500));
+    }
+
+    if (!newUserId) {
+        return next(new HttpError('Creacion de usuario fallo', 500));
+    }
+
+    /**
+     * Upload the images or image using the created business id
+     * if upload fails: delete the business id in business collection
+     */
+
+    let photoINE;
+    try {
+        photoINE = await fileUploader(ROLE.BUSINESS, { id: newUserId, childFolder: 'register' }, { file: req.files['photoINE'] })
+            .then(fileUrl => {
+                if (!fileUrl) {
+                    return false
+                }
+                return fileUrl
+            })
+            .catch(err => {
+                console.log(err);
+                return false
+            })
+    } catch (error) {
+        return next(new HttpError('Algo salio mal, intente mas tarde', 503));
+    }
+
+    if (!photoINE) {
+        deleteBusinessFromCollection(newUserId)
+            .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+            .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+        return next(new HttpError('Algo salio mal, intente mas tarde', 503))
+    }
+
+    let photoBusiness
+    if (req.files['photoBusiness']) {
+        try {
+            photoBusiness = await fileUploader(ROLE.BUSINESS, { id: newUserId, childFolder: 'register' }, { file: req.files['photoBusiness'] })
+                .then(fileUrl => {
+                    if (!fileUrl) {
+                        return false
+                    }
+                    return fileUrl
+                })
+                .catch(err => {
+                    console.log(err);
+                    return false
+                })
+        } catch (error) {
+            return next(new HttpError('Algo salio mal, intente mas tarde', 503));
+        }
+    } else {
+        photoBusiness = 'empty'
+    }
+
+    if (!photoBusiness) {
+        deleteBusinessFromCollection(newUserId)
+            .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+            .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+        return next(new HttpError('Algo salio mal, intente mas tarde', 503))
+    }
+
+    /**
+     * Update the photos url of created business in business collection 
+     */
+    let updated;
+    try {
+        updated = await firebase.firestore().collection('business').doc(newUserId)
+            .update({
+                photoINE: photoINE,
+                photoBusiness: photoBusiness
+            })
+            .then(_ => true)
+            .catch(_ => false);
+    } catch (error) {
+        console.log(error);
+        deleteBusinessFromCollection(newUserId)
+            .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+            .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+        return next(new HttpError('Algo salio mal, intente mas tarde', 503))
+    }
+
+    if (!updated) {
+        deleteBusinessFromCollection(newUserId)
+            .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+            .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+        return next(new HttpError('Algo salio mal, intente mas tarde', 503))
+    }
+
+    /**
+     * Hash the password 
+     */
+
+    let hashedPassword;
+    try {
+        hashedPassword = await bcrypt.hash(body.password, 12)
+            .then(hash => {
+                return hash;
+            })
+            .catch(err => '')
+    } catch (error) {
+        return next(new HttpError('Creacion de usuario fallo', 500));
+    }
+
+    if (!hashedPassword) {
+        deleteBusinessFromCollection(newUserId)
+            .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+            .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+        return next(new HttpError('Creacion de usuario fallo', 500));
+    }
+
+    /**
+     * Upload the user to users collection
+     * if upload fails: delete the image(s) and delete the business id in business collection
+     */
+
+    const user = {
+        email: email,
+        password: hashedPassword,
+        isCustomer: false
+    }
+
+    let newUser;
+    try {
+        newUser = await firebase.firestore().collection('users').doc(newUserId).set(user)
+            .then(_ => {
+                return true;
+            })
+            .catch(_ => {
+                deleteBusinessFromCollection(newUserId)
+                    .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+                    .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+            })
+
+    } catch (_) {
+        deleteBusinessFromCollection(newUserId)
+            .then(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+            .catch(_ => next(new HttpError('Creacion de usuario fallo', 500)))
+    }
+
+    if (!newUser) return next(new HttpError('Creacion de usuario fallo', 500));
+
+    /**
+     * Create the token and send it 
+     */
+
+    const token = jwt.sign(
+        {
+            email: user.email,
+            id: newUserId
+        },
+        process.env.JWT_KEY,
+        { expiresIn: '1h' }
+    );
+
+    /**
+     * Set newBusiness 
+     */
+    newBusiness = {
+        ...newBusiness,
+        photoINE: photoINE,
+        photoBusiness: photoBusiness
+    }
+
+    res.json({
+        message: 'CREATION SUCCESS',
+        business: newBusiness,
+        token: token,
+        isCustomer: false,
+        id: newUserId
+    })
+
+};
 
 const verifyEmailExist = (req, res, next) => {
     let email = req.params.email;

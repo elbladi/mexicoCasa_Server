@@ -1,5 +1,5 @@
 const ROLE = {
-    BUSINESS: false,
+    BUSINESS: true,
     CUSTOMER: true,
 }
 

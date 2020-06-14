@@ -7,34 +7,9 @@ const fileUpload = require('express-fileupload');
 const router = express.Router();
 router.use(fileUpload());
 
-router.post('/newClient',
-    // [
-    //     check('name').not().isEmpty(),
-    //     check('apellidos').not().isEmpty(),
-    //     check('email').normalizeEmail().isEmail(),
-    //     check('password').not().isEmpty(),
-    //     check('telefono').isLength({ min: 10 }),
-    //     check('direccion').not().isEmpty(),
-    //     check('fotoINE').not().isEmpty
-    // ],
-    registroController.newClient);
+router.post('/newClient', registroController.newClient);
 
-
-router.post('/newBusiness',
-    // [
-    //     check('nameResponsable').not().isEmpty(),
-    //     check('apellidos').not().isEmpty(),
-    //     check('email').normalizeEmail().isEmail(),
-    //     check('password').not().isEmpty(),
-    //     check('telefono').isLength({ min: 10 }),
-    //     check('name').not().isEmpty(),
-    //     check('direccion').not().isEmpty(),
-    //     check('desc').not().isEmpty(),
-    //     check('fotoNegocio').not().isEmpty(),
-    //     check('fotoINE').not().isEmpty(),
-
-    // ], 
-    registroController.newBusiness);
+router.post('/newBusiness', registroController.newBusiness);
 
 router.get('/verifyEmail/:email', registroController.verifyEmailExist)
 

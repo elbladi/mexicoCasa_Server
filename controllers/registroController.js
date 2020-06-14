@@ -9,71 +9,119 @@ const instance = require('../firebase');
 require('firebase/firestore');
 require('firebase/auth');
 
-const newClient = (req, res, next) => {
-    console.log('Llego al controller')
-    const error = validationResult(req);
-    if (!error.isEmpty()) {
-        return next(
-            new HttpError('Error, Por favor revisa tus datos de entrada', 422)
-        );
-    }
+const newClient = async (req, res, next) => {
 
-    console.log('Inicio instancia')
     let firebase = instance.getInstance();
 
-    let hashedPassword;
+    /*
+    * Verify the user is not registered
+    */
+
+    let userExist;
     try {
-        bcrypt.hash(req.body.password, 12)
-            .then(hash => {
-                hashedPassword = hash;
+        userExist = await firebase.firestore().collection('users')
+            .where('email', '==', req.body.email)
+            .get()
+            .then(snapshot => {
+                if (snapshot.empty) return false
+                else return true;
             })
-            .catch(err => next(new HttpError('Creacion de usuario fallo', 500)))
+    } catch (error) {
+        return next(new HttpError('Algo salio mal, por favor verificar datos', 500));
+    }
+
+    if (userExist) {
+        res.json({ message: 'Email registrado. Por favor hacer Login' });
+    }
+
+    /**
+     * Register the user in client collection
+     * Get the created client id
+     */
+
+    let newClient = {
+        ...req.body,
+        verificado: false
+    }
+    delete (newClient['password'])
+
+    let newUserId;
+    try {
+        newUserId = await firebase.firestore().collection('clients').add(newClient)
+            .then(resp => {
+                return resp.id;
+            })
+            .catch(_ => {
+                next(new HttpError('Creacion de usuario fallo', 500))
+            })
     } catch (error) {
         return next(new HttpError('Creacion de usuario fallo', 500));
     }
 
-    console.log('INICIANDO...')
-    try {
-        firebase.auth().createUserWithEmailAndPassword(req.body.email, req.body.password)
-            .then(succ => {
-                try {
-                    console.log(hashedPassword);
-                    const newUser = {
-                        ...req.body,
-                        // password: hashedPassword,
-                        verificado: false
-                    }
-                    delete newUser['password'];
-                    firebase.firestore().collection('clients').add(newUser)
-                        .then(resp => {
-                            console.log('Usuario creado')
-                            const user = {
-                                email: req.body.email,
-                                password: hashedPassword,
-                                isCustomer: true
-                            }
-                            firebase.firestore().collection('users').doc(resp.id).set(user).
-                                then(succ => {
-                                    res.json({ message: 'CREATION SUCCESS' })
-                                })
-                                .catch(err => {
-                                    firebase.firestore().collection('clients').doc(resp.id).delete().catch(err => {
-                                        return next(new HttpError('Creacion de usuario fallo, por favor intentalo mas tarde', 501));
-                                    })
-                                })
-                        })
-                        .catch(error => next(new HttpError(error.message, 500)))
-                } catch (error) {
-                    return next(new HttpError(error.message, 500));
-                }
-            })
-            .catch(error => {
-
-                return next(new HttpError(error.message, 500))
-            })
-    } catch (error) {
-        return next(new HttpError(error.message, 500));
+    if (!newUserId) {
+        return next(new HttpError('Creacion de usuario fallo', 500));
     }
+
+    /**
+    * Hash the password 
+    */
+
+    let hashedPassword;
+    try {
+        hashedPassword = await bcrypt.hash(req.body.password, 12)
+            .then(hash => {
+                return hash;
+            })
+            .catch(err => '')
+    } catch (error) {
+        return next(new HttpError('Creacion de usuario fallo', 500));
+    }
+
+    if (!hashedPassword) return next(new HttpError('Creacion de usuario fallo', 500));
+
+    /**
+     * Upload the user to users collection
+     */
+
+    const user = {
+        email: newClient.email,
+        password: hashedPassword,
+        isCustomer: true
+    }
+
+    let newUser;
+    try {
+        newUser = await firebase.firestore().collection('users').doc(newUserId).set(user)
+            .then(_ => true)
+            .catch(_ => false)
+
+    } catch (_) {
+        return next(new HttpError('Creacion de usuario fallo', 500));
+    }
+
+    if (!newUser) return next(new HttpError('Creacion de usuario fallo', 500));
+
+    /**
+     * Create the token and send it 
+     */
+
+    const token = jwt.sign(
+        {
+            email: user.email,
+            id: newUserId
+        },
+        process.env.JWT_KEY,
+        { expiresIn: '1h' }
+    );
+
+
+    res.json({
+        message: 'Ok',
+        client: newClient,
+        token: token,
+        isCustomer: true,
+        id: newUserId
+    })
 
 };
 
@@ -102,7 +150,7 @@ const newBusiness = async (req, res, next) => {
 
     if (!req.files) return next(new HttpError('no llego el file', 500));
     if (!req.files['photoINE']) return next(new HttpError('Foto de ID requerida', 500));
-    //CAMBIAR ESTE EMAIL
+
     let body = {}
     Object.keys(req.body).forEach((value, _) => {
         body[value] = JSON.parse(req.body[value]);
@@ -167,17 +215,7 @@ const newBusiness = async (req, res, next) => {
 
     let photoINE;
     try {
-        photoINE = await fileUploader(ROLE.BUSINESS, { id: newUserId, childFolder: 'register' }, { file: req.files['photoINE'] })
-            .then(fileUrl => {
-                if (!fileUrl) {
-                    return false
-                }
-                return fileUrl
-            })
-            .catch(err => {
-                console.log(err);
-                return false
-            })
+        photoINE = await fileUploader(ROLE.BUSINESS, { id: newUserId, childFolder: 'register' }, { file: req.files['photoINE'] });
     } catch (error) {
         return next(new HttpError('Algo salio mal, intente mas tarde', 503));
     }
@@ -193,16 +231,6 @@ const newBusiness = async (req, res, next) => {
     if (req.files['photoBusiness']) {
         try {
             photoBusiness = await fileUploader(ROLE.BUSINESS, { id: newUserId, childFolder: 'register' }, { file: req.files['photoBusiness'] })
-                .then(fileUrl => {
-                    if (!fileUrl) {
-                        return false
-                    }
-                    return fileUrl
-                })
-                .catch(err => {
-                    console.log(err);
-                    return false
-                })
         } catch (error) {
             return next(new HttpError('Algo salio mal, intente mas tarde', 503));
         }

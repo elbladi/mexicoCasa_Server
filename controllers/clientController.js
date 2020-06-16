@@ -36,26 +36,25 @@ const getBusiness = (req, res, next) => {
 
 const getBusinesses = (req, res, next) => {
 
-    let businesses = {};
+    let businesses = [];
+    
     try {
         const firebase = instance.getInstance();
-        // const userId = req.params.userId;
         firebase.firestore().collection('business').get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
                     const business = {
+                        id: [doc.id],
                         [doc.id]: { ...doc.data() }
-                    }
-                    businesses = business
+                    }                    
+                    businesses.push(business)
                 });
                 res.json({
-                    message: 'We have the businesses',
                     businesses: businesses
                 })
             }).catch(error => {
                 new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503);
             });
-
     } catch (error) {
         new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503);
 

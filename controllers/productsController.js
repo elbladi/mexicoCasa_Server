@@ -55,16 +55,21 @@ const addProductNewBusiness = async (idBusiness, products) => {
             throw new HttpError('Algo salio mal, intente mas tarde', 503);
         });
 
-    return productAdded ? productAdded : false;
+    return isProductAdded ? isProductAdded : false;
 }
 
 const addProduct = async (req, res, next) => {
     try {
-        const idBusiness = req.body.idBusiness;
+        let body = {}
+        Object.keys(req.body).forEach((value, _) => {
+            body[value] = JSON.parse(req.body[value]);
+        })
+
+        const idBusiness = body.idBusiness;
         const product = {
-            name: req.body.name,
-            description: req.body.desc,
-            price: parseFloat(req.body.price),
+            name: body.name,
+            description: body.desc,
+            price: parseFloat(body.price),
             url: '',
         }
 

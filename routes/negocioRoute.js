@@ -14,9 +14,12 @@ router.get('/getNegocio/:negId', negocioController.getNegocioDetails);
 router.get('/pedidos/preparando/:negId', negocioController.getPreparando);
 router.get('/pedidos/ready/:negId', negocioController.getFinished);
 router.post('/updateOrder', negocioController.updateStage);
-
+router.post('/updWithImage/:negId', negocioController.updateBusinessWithPhoto);
+router.post('/updWithoutImage/:negId', negocioController.updateBusinessWithoutPhoto);
+router.patch('/update/:negId', negocioController.updateBusiness);
 
 router.get('/getProducts/:negId', productsController.getProducts);
 router.post('/addProduct', productsController.addProduct);
+
 
 module.exports = router;

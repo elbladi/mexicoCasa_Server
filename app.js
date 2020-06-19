@@ -46,7 +46,7 @@ app.use('/api/registro', registroRoute);
 // app.use(checkAuth);
 
 app.use('/api/client', authRole(ROLE.CUSTOMER), clientRoute);
-app.use('/api/business', clientRoute);
+app.use('/api/business', negocioRoute);
 app.use('/api/products', authRole(ROLE.BUSINESS), negocioRoute);
 
 app.use((req, res, next) => {

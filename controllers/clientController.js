@@ -37,7 +37,7 @@ const getBusiness = (req, res, next) => {
 const getBusinesses = (req, res, next) => {
 
     let businesses = [];
-    
+
     try {
         const firebase = instance.getInstance();
         firebase.firestore().collection('business').get()
@@ -46,7 +46,7 @@ const getBusinesses = (req, res, next) => {
                     const business = {
                         id: [doc.id],
                         [doc.id]: { ...doc.data() }
-                    }                    
+                    }
                     businesses.push(business)
                 });
                 res.json({
@@ -60,10 +60,6 @@ const getBusinesses = (req, res, next) => {
 
     };
 }
-
-const newClient = (req, res, next) => {
-
-};
 
 const checkout = async (req, res, next) => {
     // Guardar en orders de la BD
@@ -91,7 +87,35 @@ const checkout = async (req, res, next) => {
     })
 
 }
+
+const getLoggedClient = async (req, res, next) => {
+    const clientId = req.params.clientId
+    if (!clientId) return next(new HttpError("Cliente no encontrado", 404));
+    let firebase = instance.getInstance();
+    let client;
+    try {
+        client = await firebase.firestore().collection('clients').doc(clientId)
+            .get()
+            .then(doc => {
+                if (!doc.exists) {
+                    console.log('Cliente no encontrado')
+                    return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
+                } else {
+                    res.json({
+                        client: { ...doc.data() }
+                    })
+                }
+            })
+
+            
+    } catch (error) {
+        console.log(error);
+        return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
+    }
+
+}
+
 exports.getBusinesses = getBusinesses;
 exports.getBusiness = getBusiness;
-exports.newClient = newClient;
 exports.checkout = checkout;
+exports.getLoggedClient = getLoggedClient;

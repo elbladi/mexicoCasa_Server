@@ -1,6 +1,7 @@
 //const jwt = require('jsonwebtoken');
 const HttpError = require('../util/http-error');
 const instance = require('../firebase');
+const { distancia, getDayOfWeek } = require('../util/formulaDistancia/distancia')
 require('firebase/firestore');
 const { v4: uuid } = require('uuid');
 
@@ -35,27 +36,55 @@ const getBusiness = (req, res, next) => {
 }
 
 const getBusinesses = (req, res, next) => {
+    const lat = req.params.lat
+    const lng = req.params.lng
+    const date = new Date()
+    const currentDay = (getDayOfWeek(date))
+
+    let time = date.getHours() + ":" + date.getMinutes();
 
     let businesses = [];
-    
+
     try {
         const firebase = instance.getInstance();
         firebase.firestore().collection('business').get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
-                    const business = {
-                        id: [doc.id],
-                        [doc.id]: { ...doc.data() }
-                    }                    
-                    businesses.push(business)
+                    doc.data().schedule.map(schedule => {
+                        if (schedule.dia === currentDay) {
+                            if (schedule.abierto) {
+                                if ((time <= schedule.horaCerrado)) {
+                                    const dist = distancia(lat, lng, doc.data().geolocation.lat, doc.data().geolocation.lng)
+                                    if (dist <= 1000) {
+                                        const business = {
+                                            id: [doc.id],
+                                            [doc.id]: {
+                                                ...doc.data(),
+                                                distance: dist,
+                                                schedule: {
+                                                    horaAbierto: schedule.horaAbierto,
+                                                    horaCerrado: schedule.horaCerrado
+                                                }
+                                            },
+                                        }
+                                        businesses.push(business)
+                                    }
+                                }
+                            }
+
+                        }
+                    })
                 });
+
                 res.json({
                     businesses: businesses
                 })
             }).catch(error => {
+                console.log(error)
                 new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503);
             });
     } catch (error) {
+        console.log(error)
         new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503);
 
     };

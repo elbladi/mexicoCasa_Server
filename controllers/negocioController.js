@@ -43,7 +43,6 @@ const getFinished = (req, res, next) => {
                 }
             })
             .catch(err => {
-                console.log('Error getting documents', err);
                 return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
             })
     } catch (error) {
@@ -84,7 +83,6 @@ const getPreparando = (req, res, next) => {
                 }
             })
             .catch(err => {
-                console.log('Error getting documents', err);
                 return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
             })
     } catch (error) {
@@ -125,7 +123,6 @@ const getPedidos = (req, res, next) => {
                 }
             })
             .catch(err => {
-                console.log('Error getting documents', err);
                 return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
             })
     } catch (error) {
@@ -169,11 +166,10 @@ const getProducts = (id) => {
                     }
                 })
                 .catch(() => {
-                    console.log('error haciendo request a products')
                     error();
                 })
         } catch (error) {
-            console.log('error en getProducts');
+            throw error;
         }
     })
 }
@@ -187,7 +183,6 @@ const getNegocioDetails = (req, res, next) => {
             .get()
             .then(doc => {
                 if (!doc.exists) {
-                    console.log('Documento no existe')
                     return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
                 } else {
                     let negocioDetails = { ...doc.data() };
@@ -199,24 +194,23 @@ const getNegocioDetails = (req, res, next) => {
                                     details: negocioDetails
                                 })
                             } else {
-                                const negocio = {
-                                    details: negocioDetails,
-                                    ...resp
-                                }
+                                // const negocio = {
+                                //     details: negocioDetails,
+                                //     ...resp
+                                // }
                                 res.json({
-                                    negocio: negocio
+                                    products: resp.products,
+                                    details: negocioDetails
                                 })
                             }
                         })
                         .catch(err => {
-                            console.log('getProducts catch')
                             return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
                         })
                 }
             })
 
     } catch (error) {
-        console.log('algo salio mal en general alv')
         return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
     }
 
@@ -228,8 +222,6 @@ const updateBusinessWithPhoto = async (req, res, next) => {
     Object.keys(req.body).forEach((value, _) => {
         body[value] = JSON.parse(req.body[value]);
     })
-
-    console.log(body);
 
     const idBusiness = req.params.negId;
 
@@ -250,7 +242,6 @@ const updateBusinessWithPhoto = async (req, res, next) => {
         res.json({ imageUrl: fileUrl });
 
     } catch (error) {
-        console.log(error)
         return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503))
     }
 
@@ -273,7 +264,6 @@ const updateBusinessWithoutPhoto = async (req, res, next) => {
 
         res.status(200).send();
     } catch (error) {
-        console.log(error)
         return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503))
     }
 }
@@ -291,7 +281,6 @@ const updateBusiness = async (req, res, next) => {
         res.status(200).send()
 
     } catch (error) {
-        console.log(error)
         return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503))
     }
 

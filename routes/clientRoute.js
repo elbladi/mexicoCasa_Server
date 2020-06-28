@@ -10,6 +10,9 @@ const router = express.Router();
 router.post('/checkout', clientController.checkout);
 router.get('/businesses', clientController.getBusinesses);
 router.get('/getBusiness/:idBusiness', clientController.getBusiness);
+router.get('/getClient/:clientId', clientController.getLoggedClient);
+router.patch('/updateClient/:clientId', clientController.updateClient);
+router.patch('/updatePassword/:clientId', clientController.updatePassword);
 router.route('/businesses/:lat/:lng').get(clientController.getBusinesses);
 
 

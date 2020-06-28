@@ -7,6 +7,7 @@ const registroRoute = require('./routes/registroRoute');
 const clientRoute = require('./routes/clientRoute');
 const negocioRoute = require('./routes/negocioRoute');
 const homeRoute = require('./routes/homeRoute');
+const productRoute = require('./routes/productRoute');
 const checkAuth = require('./middleware/check-auth');
 const { authRole } = require('./middleware/auth');
 const { ROLE } = require('./util/permissions/roles');
@@ -43,11 +44,12 @@ app.use((req, res, next) => {
 app.use('/api/home', homeRoute);
 app.use('/api/registro', registroRoute);
 
-// app.use(checkAuth);
+//app.use(checkAuth);
 
-app.use('/api/client', authRole(ROLE.CUSTOMER), clientRoute);
-app.use('/api/business', clientRoute);
-app.use('/api/products', authRole(ROLE.BUSINESS), negocioRoute);
+app.use('/api/customer', authRole(ROLE.CUSTOMER), clientRoute);
+app.use('/api/business', negocioRoute);
+app.use('/api/product', productRoute);
+
 
 app.use((req, res, next) => {
     throw new HttpError('Could not find this route', 404);

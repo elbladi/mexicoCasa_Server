@@ -1,9 +1,8 @@
 const HttpError = require('../util/http-error');
 const instance = require('../firebase');
-const { fileUploader } = require('../middleware/fileUploader');
+const { fileUploader, fileExist, deleteFile, getLocationFromUrl } = require('../middleware/fileUploader');
 const { ROLE } = require('../util/permissions/roles');
 require('firebase/firestore');
-
 
 const gettingProducts = async (idBusiness) => {
     const firebase = instance.getInstance();
@@ -55,16 +54,139 @@ const addProductNewBusiness = async (idBusiness, products) => {
             throw new HttpError('Algo salio mal, intente mas tarde', 503);
         });
 
-    return productAdded ? productAdded : false;
+    return isProductAdded ? isProductAdded : false;
+}
+
+const updateProduct = async (req, res, next) => {
+    try {
+
+        let body = {};
+        Object.keys(req.body).forEach((value, _) => {
+            body[value] = JSON.parse(req.body[value]);
+        });
+
+        const idBusiness = body.idBusiness;
+        const originalNameProduct = body.originalNameProduct;
+        const updateInfo = {
+            name: body.name,
+            desc: body.desc,
+            price: parseFloat(body.price),
+            url: '',
+        }
+
+        if (updateInfo && originalNameProduct && idBusiness) {
+
+            if (!body.file && req.files) {
+
+                const isFile = await fileExist(ROLE.BUSINESS, { id: idBusiness, childFolder: 'products' }, req.files);
+
+                if (!isFile.exist) {
+
+                    const fileUrl = await fileUploader(ROLE.BUSINESS, { id: idBusiness, childFolder: 'products' }, req.files);
+
+                    if (!fileUrl) {
+                        return next(new HttpError('Algo salio mal, intente mas tarde', 503));
+                    }
+
+                    updateInfo.url = fileUrl;
+
+                } else {
+                    return next(new HttpError('La imagen ya es usada en otro producto', 406));
+                }
+
+            } else {
+                updateInfo.url = body.file;
+            }
+
+            const products = await gettingProducts(idBusiness);
+
+            let productIndex;
+            let dbImageUrl;
+            products.forEach((prod, index) => {
+
+                if (prod.name === originalNameProduct) {
+                    productIndex = index;
+                    dbImageUrl = prod.url;
+                }
+            });
+
+            if (dbImageUrl && updateInfo.url && (getLocationFromUrl(dbImageUrl) !== getLocationFromUrl(updateInfo.url))) {
+                await deleteFile(dbImageUrl);
+
+            }
+
+            products[productIndex] = updateInfo;
+
+            const isProductUpdated = await updateBusinessProduct(idBusiness, {
+                products: products
+            });
+
+            if (isProductUpdated) {
+                res.status(201).json({
+                    message: 'Se actualizó el producto exitosamente',
+                });
+            }
+        } else {
+            res.status(406).json({
+                message: "Los campos son requeridos"
+            });
+        }
+    } catch (error) {
+        return next(new HttpError('Algo salio mal, intente mas tarde', 503));
+    }
+}
+
+const deleteProduct = async (req, res, next) => {
+    try {
+        const idBusiness = req.body.idBusiness;
+        const name = req.body.name;
+        const url = req.body.url;
+
+        if (idBusiness && name && url) {
+            const fileDeleted = await deleteFile(url);
+
+            if (fileDeleted) {
+                const firebaseCollection = instance.getInstance().firestore().collection('products');
+
+                const products = await gettingProducts(idBusiness);
+
+                const newProducts = products.filter(prod => prod.name !== name);
+
+                const isProductUpdated = await updateBusinessProduct(idBusiness, {
+                    products: newProducts
+                });
+
+                if (isProductUpdated) {
+                    res.status(201).json({
+                        message: 'Se elimino el producto exitosamente',
+                    });
+                }
+
+            } else {
+                return next(new HttpError('Algo salio mal, intente mas tarde', 503));
+            }
+
+        } else {
+            res.status(406).json({
+                message: "Los campos son requeridos"
+            });
+        }
+    } catch (error) {
+        return next(new HttpError('Algo salio mal, intente mas tarde', 503));
+    };
 }
 
 const addProduct = async (req, res, next) => {
     try {
-        const idBusiness = req.body.idBusiness;
+        let body = {}
+        Object.keys(req.body).forEach((value, _) => {
+            body[value] = JSON.parse(req.body[value]);
+        })
+        const idBusiness = body.idBusiness;
         const product = {
-            name: req.body.name,
-            description: req.body.desc,
-            price: parseFloat(req.body.price),
+            name: body.name,
+            desc: body.desc,
+            price: parseFloat(body.price),
             url: '',
         }
 
@@ -87,7 +209,7 @@ const addProduct = async (req, res, next) => {
                 if (!productFound) {
                     products.unshift(product);
 
-                    const isProductUpdated = updateBusinessProduct(idBusiness, {
+                    const isProductUpdated = await updateBusinessProduct(idBusiness, {
                         products: products
                     });
 
@@ -121,7 +243,7 @@ const addProduct = async (req, res, next) => {
             });
         }
     } catch (error) {
-        return next(new HttpError('Algo salio mal, intente mas tarde', 503));;
+        return next(new HttpError('Algo salio mal, intente mas tarde', 503));
     }
 
 }
@@ -145,5 +267,9 @@ const getProducts = async (req, res, next) => {
 
 }
 
-exports.getProducts = getProducts;
-exports.addProduct = addProduct;
+module.exports = {
+    getProducts,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+}

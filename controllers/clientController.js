@@ -5,10 +5,7 @@ const { distancia, getDayOfWeek } = require('../util/formulaDistancia/distancia'
 require('firebase/firestore');
 const { v4: uuid } = require('uuid');
 
-// const fb = require('firebase/app');
-// const x = fb.initializeApp(firebaseConfig);
 
-// x.firestore().collection('orders').doc(orderId).set()
 const getBusiness = (req, res, next) => {
     const idBusiness = req.params.idBusiness
     if (!idBusiness) {
@@ -50,30 +47,36 @@ const getBusinesses = (req, res, next) => {
         firebase.firestore().collection('business').get()
             .then(snapshot => {
                 snapshot.forEach(doc => {
-                    doc.data().schedule.map(schedule => {
-                        if (schedule.dia === currentDay) {
-                            if (schedule.abierto) {
-                                if ((time <= schedule.horaCerrado)) {
-                                    const dist = distancia(lat, lng, doc.data().geolocation.lat, doc.data().geolocation.lng)
-                                    if (dist <= 1000) {
-                                        const business = {
-                                            id: [doc.id],
-                                            [doc.id]: {
-                                                ...doc.data(),
-                                                distance: dist,
-                                                schedule: {
-                                                    horaAbierto: schedule.horaAbierto,
-                                                    horaCerrado: schedule.horaCerrado
-                                                }
-                                            },
+                    const verificar = {
+                        verificado: doc.data().verificado
+                    }
+                    if (verificar.verificado) {
+                        doc.data().schedule.map(schedule => {
+                            if (schedule.dia === currentDay) {
+                                if (schedule.abierto) {
+                                    if ((time <= schedule.horaCerrado)) {
+                                        const dist = distancia(lat, lng, doc.data().geolocation.lat, doc.data().geolocation.lng)
+                                        if (dist <= 6500) {
+                                            const business = {
+                                                id: [doc.id],
+                                                [doc.id]: {
+                                                    ...doc.data(),
+                                                    distance: dist,
+                                                    schedule: {
+                                                        horaAbierto: schedule.horaAbierto,
+                                                        horaCerrado: schedule.horaCerrado
+                                                    }
+                                                },
+                                            }
+                                            businesses.push(business)
                                         }
-                                        businesses.push(business)
                                     }
                                 }
-                            }
 
-                        }
-                    })
+                            }
+                        })
+                    }
+
                 });
 
                 res.json({
@@ -99,9 +102,7 @@ const checkout = async (req, res, next) => {
     let firebase = instance.getInstance();
     let order;
     try {
-        const orderId = uuid();
-        console.log(req.body);
-        order = await firebase.firestore().collection('orders').doc(orderId).set(req.body)
+        order = await firebase.firestore().collection('orders').doc().set(req.body)
             .then(_ => { })
             .catch(error => next(new HttpError(error.message, 503)))
     } catch (error) {
@@ -120,6 +121,7 @@ const checkout = async (req, res, next) => {
     })
 
 }
+
 exports.getBusinesses = getBusinesses;
 exports.getBusiness = getBusiness;
 exports.newClient = newClient;

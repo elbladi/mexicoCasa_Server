@@ -224,7 +224,7 @@ const updateBusinessWithPhoto = async (req, res, next) => {
     })
 
     const idBusiness = req.params.negId;
-
+    console.log(req.body);
     try {
         const fileUrl = await fileUploader(ROLE.BUSINESS, { id: idBusiness, childFolder: 'prueba' }, req.files);
 
@@ -242,6 +242,7 @@ const updateBusinessWithPhoto = async (req, res, next) => {
         res.json({ imageUrl: fileUrl });
 
     } catch (error) {
+        console.log(error);
         return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503))
     }
 

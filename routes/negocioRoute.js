@@ -1,8 +1,10 @@
 const express = require('express');
 
 const negocioController = require('../controllers/negocioController');
+const fileUpload = require('express-fileupload');
 
 const router = express.Router();
+router.use(fileUpload());
 
 router.get('/pedidos/:negId', negocioController.getPedidos);
 router.get('/getNegocio/:negId', negocioController.getNegocioDetails);

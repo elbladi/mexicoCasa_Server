@@ -126,16 +126,30 @@ const addProduct = (req, res, next) => {
 
 const getProducts = (req, res, next) => {
     const idBusiness = req.params.negId
+    const firebase = instance.getInstance();
     if (idBusiness) {
         gettingProducts(idBusiness)
             .then(products => {
+
                 if (products) {
-                    res.status(201).json({
-                    products: products
-                })
-            }
-        })
+                    firebase.firestore().collection('business').doc(idBusiness)
+                        .get()
+                        .then(doc => {
+                            if (!doc.exists) {
+                                console.log('Documento no existe')
+                                return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
+                            } else {
+                                let businessData = { ...doc.data() };
+                                res.status(201).json({
+                                    products: products,
+                                    businessData: businessData
+                                })
+                            }
+                        })
+                }
+            })
     }
+
 }
 
 exports.getProducts = getProducts;

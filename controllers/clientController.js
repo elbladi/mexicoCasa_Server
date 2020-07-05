@@ -57,7 +57,7 @@ const getBusinesses = (req, res, next) => {
                                 if (schedule.abierto) {
                                     if ((time <= schedule.horaCerrado)) {
                                         const dist = distancia(lat, lng, doc.data().geolocation.lat, doc.data().geolocation.lng)
-                                        if (dist <= 15000) {
+                                        if (dist <= 20000) {
                                             const business = {
                                                 id: [doc.id],
                                                 [doc.id]: {

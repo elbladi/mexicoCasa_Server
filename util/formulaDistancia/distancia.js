@@ -8,7 +8,7 @@ const distancia = (lat1, lon1, lat2, lon2) => {
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     //aquí obtienes la distancia en metros por la conversion 1Km =1000m
-    var d = R * c * 1000;
+    var d = R * c;
     return d;
 }
 

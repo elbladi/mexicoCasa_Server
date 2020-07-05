@@ -129,7 +129,6 @@ const getLoggedClient = async (req, res, next) => {
             .get()
             .then(doc => {
                 if (!doc.exists) {
-                    console.log('Cliente no encontrado')
                     return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
                 } else {
                     res.json({
@@ -239,6 +238,36 @@ const updatePassword = async (req, res, next) => {
     
 }
 
+const getClientNamePhone = async (req, res, next) => {
+    const clientId = req.params.clientId
+    if (!clientId) return next(new HttpError("Cliente no encontrado", 404));
+    let firebase = instance.getInstance();
+    let client;
+    try {
+        client = await firebase.firestore().collection('clients').doc(clientId)
+            .get()
+            .then(doc => {
+                if (!doc.exists) {
+                    return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
+                } else {
+                    res.json({
+                        client: { 
+                            name: doc.data().name,
+                            apellidos: doc.data().apellidos,
+                            telefono: doc.data().telefono,
+                         }
+                    })
+                }
+            })
+
+
+    } catch (error) {
+        console.log(error);
+        return next(new HttpError('Algo salio mal. Por favor, intentalo de nuevo', 503));
+    }
+
+}
+
 
 exports.getBusinesses = getBusinesses;
 exports.getBusiness = getBusiness;
@@ -246,3 +275,4 @@ exports.checkout = checkout;
 exports.getLoggedClient = getLoggedClient;
 exports.updateClient = updateClient;
 exports.updatePassword = updatePassword;
+exports.getClientNamePhone = getClientNamePhone;

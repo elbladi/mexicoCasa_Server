@@ -7,6 +7,7 @@ const registroRoute = require('./routes/registroRoute');
 const clientRoute = require('./routes/clientRoute');
 const negocioRoute = require('./routes/negocioRoute');
 const homeRoute = require('./routes/homeRoute');
+const ordersRoute = require('./routes/ordersRoute');
 const productRoute = require('./routes/productRoute');
 const checkAuth = require('./middleware/check-auth');
 const { authRole } = require('./middleware/auth');
@@ -44,11 +45,12 @@ app.use((req, res, next) => {
 app.use('/api/home', homeRoute);
 app.use('/api/registro', registroRoute);
 
-//app.use(checkAuth);
+app.use(checkAuth);
 
-app.use('/api/customer', authRole(ROLE.CUSTOMER), clientRoute);
+app.use('/api/customer', clientRoute);
 app.use('/api/business', negocioRoute);
 app.use('/api/product', productRoute);
+app.use('/api/orders', ordersRoute);
 
 
 app.use((req, res, next) => {
@@ -58,6 +60,7 @@ app.use((req, res, next) => {
 
 app.use((error, req, res, next) => {
     res.status(error.code || 500);
+    
     res.json({ message: error.message || 'An unknown error occurred!' });
 });
 

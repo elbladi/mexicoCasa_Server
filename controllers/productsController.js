@@ -124,6 +124,7 @@ const updateProduct = async (req, res, next) => {
             if (isProductUpdated) {
                 res.status(201).json({
                     message: 'Se actualizó el producto exitosamente',
+                    url: updateInfo.url,
                 });
             }
         } else {

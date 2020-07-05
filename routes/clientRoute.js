@@ -1,20 +1,17 @@
 const express = require('express')
-const checkout = require('../middleware/check-auth');
 const clientController = require('../controllers/clientController');
+const { authRole } = require('../middleware/auth');
+const { ROLE } = require('../util/permissions/roles');
 
 const router = express.Router();
 
-
-// router.use(checkout)
-
-router.post('/checkout', clientController.checkout);
-router.get('/businesses', clientController.getBusinesses);
-router.get('/getBusiness/:idBusiness', clientController.getBusiness);
-router.get('/getClient/:clientId', clientController.getLoggedClient);
-router.patch('/updateClient/:clientId', clientController.updateClient);
-router.patch('/updatePassword/:clientId', clientController.updatePassword);
+router.post('/checkout', authRole(ROLE.CUSTOMER), clientController.checkout);
+router.get('/businesses', authRole(ROLE.CUSTOMER), clientController.getBusinesses);
+router.get('/getBusiness/:idBusiness', authRole(ROLE.CUSTOMER), clientController.getBusiness);
+router.get('/getClient/:clientId', authRole(ROLE.CUSTOMER), clientController.getLoggedClient);
+router.patch('/updateClient/:clientId', authRole(ROLE.CUSTOMER), clientController.updateClient);
+router.patch('/updatePassword/:clientId', authRole(ROLE.CUSTOMER), clientController.updatePassword);
 router.route('/businesses/:lat/:lng').get(clientController.getBusinesses);
-
-
+router.get('/getClientNamePhone/:clientId', clientController.getClientNamePhone);
 
 module.exports = router

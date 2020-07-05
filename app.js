@@ -22,13 +22,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCdrGa36-Lo-DH9J3BoEj1Wir6hwfIYBpA",
-    authDomain: "catalogocovid2020.firebaseapp.com",
-    databaseURL: "https://catalogocovid2020.firebaseio.com",
-    projectId: "catalogocovid2020",
-    storageBucket: "catalogocovid2020.appspot.com",
-    messagingSenderId: "1030415722995",
-    appId: "1:1030415722995:web:b62bf0ba6bc4c373094a86"
+    apiKey: process.env.API_KEY,
+    authDomain: process.env.AUTH_DOMAN,
+    databaseURL: process.env.DB_URL,
+    projectId: process.env.PROJECT_ID,
+    storageBucket: process.env.STORAGE_BUCKET,
+    messagingSenderId: process.env.MESS_SENDER_ID,
+    appId: process.env.APP_ID
 };
 
 require('./firebase').init(firebaseConfig);

@@ -1,5 +1,12 @@
 {
     "env": {
-        "JWT_KEY": "3st4_es_lA_llave_@_secreta_123"
+        "JWT_KEY": "3st4_es_lA_llave_@_secreta_123",
+        "API_KEY": "AIzaSyCdrGa36-Lo-DH9J3BoEj1Wir6hwfIYBpA",
+        "AUTH_DOMAN": "catalogocovid2020.firebaseapp.com",
+        "DB_URL": "https://catalogocovid2020.firebaseio.com",
+        "PROJECT_ID": "catalogocovid2020",
+        "STORAGE_BUCKET": "catalogocovid2020.appspot.com",
+        "MESS_SENDER_ID": "1030415722995",
+        "APP_ID": "1:1030415722995:web:b62bf0ba6bc4c373094a86"
     }
 }

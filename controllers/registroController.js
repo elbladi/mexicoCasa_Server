@@ -108,7 +108,8 @@ const newClient = async (req, res, next) => {
     const token = jwt.sign(
         {
             email: user.email,
-            id: newUserId
+            id: newUserId,
+            isCustomer: true,
         },
         process.env.JWT_KEY,
         { expiresIn: '1h' }
@@ -332,7 +333,8 @@ const newBusiness = async (req, res, next) => {
     const token = jwt.sign(
         {
             email: user.email,
-            id: newUserId
+            id: newUserId,
+            isCustomer: false,
         },
         process.env.JWT_KEY,
         { expiresIn: '1h' }

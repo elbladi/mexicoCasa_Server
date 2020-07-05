@@ -128,17 +128,20 @@ const deleteFile = async (url) => {
     nameFile = nameFile.replace(/%20/g, ' ');
     nameFile = nameFile.replace(/%2F/g, '/');
 
-    const isDeleted = await firebaseBucket.file(nameFile).delete()
-        .then(file => {
-            if (file) {
-                return true;
-            } else {
-                return false;
-            }
+    let isDeleted;
+    if (nameFile !== 'no_image_food.svg')
+        isDeleted = await firebaseBucket.file(nameFile).delete()
+            .then(file => {
+                if (file) {
+                    return true;
+                } else {
+                    return false;
+                }
 
-        }).catch(error => {
-            return false;
-        });
+            }).catch(error => {
+                return false;
+            });
+    else return true;
 
     return isDeleted;
 }

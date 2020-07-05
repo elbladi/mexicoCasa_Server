@@ -144,6 +144,7 @@ const deleteProduct = async (req, res, next) => {
         const url = req.body.url;
 
         if (idBusiness && name && url) {
+       
             const fileDeleted = await deleteFile(url);
 
             if (fileDeleted) {
@@ -163,8 +164,6 @@ const deleteProduct = async (req, res, next) => {
                     });
                 }
 
-            } else {
-                return next(new HttpError('Algo salio mal, intente mas tarde', 503));
             }
 
         } else {
